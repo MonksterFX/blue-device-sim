@@ -1,0 +1,552 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		DDB903B72DB3D5A300BF2263 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DDB9039D2DB3D59F00BF2263 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DDB903A42DB3D59F00BF2263;
+			remoteInfo = devicesim;
+		};
+		DDB903C12DB3D5A300BF2263 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DDB9039D2DB3D59F00BF2263 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DDB903A42DB3D59F00BF2263;
+			remoteInfo = devicesim;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		DDB903A52DB3D59F00BF2263 /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = devicesim.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		DDB903A72DB3D59F00BF2263 /* devicesim */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = devicesim;
+			sourceTree = "<group>";
+		};
+		DDB903B92DB3D5A300BF2263 /* devicesimTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = devicesimTests;
+			sourceTree = "<group>";
+		};
+		DDB903C32DB3D5A300BF2263 /* devicesimUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = devicesimUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DDB903A22DB3D59F00BF2263 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903B32DB3D5A300BF2263 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903BD2DB3D5A300BF2263 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DDB9039C2DB3D59F00BF2263 = {
+			isa = PBXGroup;
+			children = (
+				DDB903A72DB3D59F00BF2263 /* devicesim */,
+				DDB903B92DB3D5A300BF2263 /* devicesimTests */,
+				DDB903C32DB3D5A300BF2263 /* devicesimUITests */,
+				DDB903A62DB3D59F00BF2263 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DDB903A62DB3D59F00BF2263 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DDB903A52DB3D59F00BF2263 /* devicesim.app */,
+				DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */,
+				DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DDB903A42DB3D59F00BF2263 /* devicesim */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB903CA2DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesim" */;
+			buildPhases = (
+				DDB903A12DB3D59F00BF2263 /* Sources */,
+				DDB903A22DB3D59F00BF2263 /* Frameworks */,
+				DDB903A32DB3D59F00BF2263 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DDB903A72DB3D59F00BF2263 /* devicesim */,
+			);
+			name = devicesim;
+			packageProductDependencies = (
+			);
+			productName = devicesim;
+			productReference = DDB903A52DB3D59F00BF2263 /* devicesim.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DDB903B52DB3D5A300BF2263 /* devicesimTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB903CD2DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesimTests" */;
+			buildPhases = (
+				DDB903B22DB3D5A300BF2263 /* Sources */,
+				DDB903B32DB3D5A300BF2263 /* Frameworks */,
+				DDB903B42DB3D5A300BF2263 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DDB903B82DB3D5A300BF2263 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DDB903B92DB3D5A300BF2263 /* devicesimTests */,
+			);
+			name = devicesimTests;
+			packageProductDependencies = (
+			);
+			productName = devicesimTests;
+			productReference = DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DDB903BF2DB3D5A300BF2263 /* devicesimUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB903D02DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesimUITests" */;
+			buildPhases = (
+				DDB903BC2DB3D5A300BF2263 /* Sources */,
+				DDB903BD2DB3D5A300BF2263 /* Frameworks */,
+				DDB903BE2DB3D5A300BF2263 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DDB903C22DB3D5A300BF2263 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DDB903C32DB3D5A300BF2263 /* devicesimUITests */,
+			);
+			name = devicesimUITests;
+			packageProductDependencies = (
+			);
+			productName = devicesimUITests;
+			productReference = DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DDB9039D2DB3D59F00BF2263 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					DDB903A42DB3D59F00BF2263 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					DDB903B52DB3D5A300BF2263 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = DDB903A42DB3D59F00BF2263;
+					};
+					DDB903BF2DB3D5A300BF2263 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = DDB903A42DB3D59F00BF2263;
+					};
+				};
+			};
+			buildConfigurationList = DDB903A02DB3D59F00BF2263 /* Build configuration list for PBXProject "devicesim" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DDB9039C2DB3D59F00BF2263;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = DDB903A62DB3D59F00BF2263 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DDB903A42DB3D59F00BF2263 /* devicesim */,
+				DDB903B52DB3D5A300BF2263 /* devicesimTests */,
+				DDB903BF2DB3D5A300BF2263 /* devicesimUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DDB903A32DB3D59F00BF2263 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903B42DB3D5A300BF2263 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903BE2DB3D5A300BF2263 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DDB903A12DB3D59F00BF2263 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903B22DB3D5A300BF2263 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB903BC2DB3D5A300BF2263 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DDB903B82DB3D5A300BF2263 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DDB903A42DB3D59F00BF2263 /* devicesim */;
+			targetProxy = DDB903B72DB3D5A300BF2263 /* PBXContainerItemProxy */;
+		};
+		DDB903C22DB3D5A300BF2263 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DDB903A42DB3D59F00BF2263 /* devicesim */;
+			targetProxy = DDB903C12DB3D5A300BF2263 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DDB903C82DB3D5A300BF2263 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DDB903C92DB3D5A300BF2263 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		DDB903CB2DB3D5A300BF2263 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = devicesim/devicesim.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"devicesim/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Need That";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Need That Too";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesim;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DDB903CC2DB3D5A300BF2263 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = devicesim/devicesim.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"devicesim/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Need That";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Need That Too";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesim;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		DDB903CE2DB3D5A300BF2263 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesimTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/devicesim.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/devicesim";
+			};
+			name = Debug;
+		};
+		DDB903CF2DB3D5A300BF2263 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesimTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/devicesim.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/devicesim";
+			};
+			name = Release;
+		};
+		DDB903D12DB3D5A300BF2263 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesimUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = devicesim;
+			};
+			name = Debug;
+		};
+		DDB903D22DB3D5A300BF2263 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrmonk.macos.devicesimUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = devicesim;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DDB903A02DB3D59F00BF2263 /* Build configuration list for PBXProject "devicesim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB903C82DB3D5A300BF2263 /* Debug */,
+				DDB903C92DB3D5A300BF2263 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDB903CA2DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB903CB2DB3D5A300BF2263 /* Debug */,
+				DDB903CC2DB3D5A300BF2263 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDB903CD2DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesimTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB903CE2DB3D5A300BF2263 /* Debug */,
+				DDB903CF2DB3D5A300BF2263 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDB903D02DB3D5A300BF2263 /* Build configuration list for PBXNativeTarget "devicesimUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB903D12DB3D5A300BF2263 /* Debug */,
+				DDB903D22DB3D5A300BF2263 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DDB9039D2DB3D59F00BF2263 /* Project object */;
+}
