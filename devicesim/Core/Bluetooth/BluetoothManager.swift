@@ -28,6 +28,9 @@ class BluetoothManager: NSObject, ObservableObject {
     // MARK: - Device Settings
     var deviceSettings: DeviceSettings?
     
+    // MARK: - Characteristic Handler Manager
+    private lazy var characteristicHandlerManager = CharacteristicHandlerManager(bluetoothManager: self)
+    
     // MARK: - Peripheral Manager
     private var peripheralManager: CBPeripheralManager!
     private var isInitialized = false
@@ -77,6 +80,9 @@ class BluetoothManager: NSObject, ObservableObject {
         if !peripheralManager.isAdvertising {
             setupService()
             
+            // Update the JS handler if enabled
+            updateJSHandler()
+            
             // Get device name from settings or use default
             let deviceName = deviceSettings?.deviceName ?? "MacOS Simulator"
             
@@ -93,6 +99,7 @@ class BluetoothManager: NSObject, ObservableObject {
     
     func stopAdvertising() {
         peripheralManager.stopAdvertising()
+        characteristicHandlerManager.stopAllHandlers()
         addLog("Stopped advertising")
         isAdvertising = false
     }
@@ -152,6 +159,23 @@ class BluetoothManager: NSObject, ObservableObject {
         peripheralManager.add(transferService)
         
         addLog("Service setup complete")
+    }
+    
+    private func updateJSHandler() {
+        guard let settings = deviceSettings, settings.useJSFunction else {
+            // Remove any existing handler if not using JS function
+            characteristicHandlerManager.removeHandler(characteristicUUID: characteristicUUID.uuidString)
+            return
+        }
+        
+        // Add or update the handler with the current settings
+        characteristicHandlerManager.updateHandler(
+            characteristicUUID: characteristicUUID.uuidString,
+            jsFunction: settings.characteristicJSFunction,
+            notifyInterval: settings.notifyInterval
+        )
+        
+        addLog("Updated JavaScript handler for characteristic")
     }
     
     private func addLog(_ message: String) {
@@ -221,26 +245,40 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         
         self.connectedCentrals.append(central)
         
-        // Send a welcome message
-        let welcomeData = "Welcome to MacOS Bluetooth Simulator!".data(using: .utf8)!
-        sendData(welcomeData)
+        // Notify the characteristic handler manager of the subscription
+        characteristicHandlerManager.handleSubscription(characteristicUUID: characteristic.uuid.uuidString)
+        
+        // Send a welcome message if not using JS functions
+        if deviceSettings?.useJSFunction != true {
+            let welcomeData = "Welcome to MacOS Bluetooth Simulator!".data(using: .utf8)!
+            sendData(welcomeData)
+        }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
         addLog("Central \(central.identifier.uuidString) unsubscribed from characteristic")
         
+        // Notify the characteristic handler manager of the unsubscription
+        characteristicHandlerManager.handleUnsubscription(characteristicUUID: characteristic.uuid.uuidString)
+        
         self.connectedCentrals.removeAll { $0.identifier == central.identifier }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        // Use auto response from settings if available
-        let responseText = deviceSettings?.autoResponseText ?? "Hello from Mac simulator!"
-        let response = responseText.data(using: .utf8)!
-        
         if request.characteristic.uuid == characteristicUUID {
-            request.value = response
+            // Check if we should use JS function for read
+            if let settings = deviceSettings, settings.useJSFunction, 
+               let jsResponse = characteristicHandlerManager.handleReadRequest(characteristicUUID: characteristicUUID.uuidString) {
+                request.value = jsResponse
+                addLog("Responded to read request with JS function result")
+            } else {
+                // Use auto response from settings
+                let responseText = deviceSettings?.autoResponseText ?? "Hello from Mac simulator!"
+                request.value = responseText.data(using: .utf8)!
+                addLog("Responded to read request with: \(responseText)")
+            }
+            
             peripheral.respond(to: request, withResult: .success)
-            addLog("Responded to read request with: \(responseText)")
         } else {
             peripheral.respond(to: request, withResult: .attributeNotFound)
             addLog("Read request for unknown characteristic")

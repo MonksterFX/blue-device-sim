@@ -8,10 +8,12 @@
 import SwiftUI
 import AppKit
 import CoreBluetooth
+import Combine
 
 struct ContentView: View {
     @StateObject private var bluetoothManager = BluetoothManager()
     @StateObject private var deviceSettings = DeviceSettings()
+    @StateObject private var viewModel = ContentViewModel()
     @State private var selectedTab = 0
     
     var body: some View {
@@ -42,6 +44,9 @@ struct ContentView: View {
         .onAppear {
             // Connect device settings to the Bluetooth manager
             bluetoothManager.deviceSettings = deviceSettings
+            
+            // Setup observers using the ViewModel
+            viewModel.setupSettingsObservers(deviceSettings: deviceSettings, bluetoothManager: bluetoothManager)
         }
     }
 }

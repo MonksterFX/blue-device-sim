@@ -7,16 +7,24 @@ struct DeviceSettingsData: Codable {
     var autoResponse: Bool
     var autoResponseText: String
     var savedMessages: [String]
+    var characteristicJSFunction: String
+    var useJSFunction: Bool
+    var notifyInterval: Double
     let createdAt: Date
     
     init(deviceName: String, serviceUUID: String, characteristicUUID: String, 
-         autoResponse: Bool, autoResponseText: String, savedMessages: [String]) {
+         autoResponse: Bool, autoResponseText: String, savedMessages: [String],
+         characteristicJSFunction: String = "", useJSFunction: Bool = false,
+         notifyInterval: Double = 1.0) {
         self.deviceName = deviceName
         self.serviceUUID = serviceUUID
         self.characteristicUUID = characteristicUUID
         self.autoResponse = autoResponse
         self.autoResponseText = autoResponseText
         self.savedMessages = savedMessages
+        self.characteristicJSFunction = characteristicJSFunction
+        self.useJSFunction = useJSFunction
+        self.notifyInterval = notifyInterval
         self.createdAt = Date()
     }
 }
@@ -28,6 +36,11 @@ class DeviceSettings: ObservableObject {
     @Published var autoResponse: Bool = true
     @Published var autoResponseText: String = "Hello from MacOS Simulator!"
     @Published var currentProfileName: String = "default"
+    
+    // New JavaScript function properties
+    @Published var characteristicJSFunction: String = "// Return value for read/notify\nreturn 'Value from JS: ' + new Date().toISOString();"
+    @Published var useJSFunction: Bool = false
+    @Published var notifyInterval: Double = 1.0
     
     // Saved message templates for quick sending
     @Published var savedMessages: [String] = [
@@ -81,7 +94,10 @@ class DeviceSettings: ObservableObject {
             characteristicUUID: characteristicUUID,
             autoResponse: autoResponse,
             autoResponseText: autoResponseText,
-            savedMessages: savedMessages
+            savedMessages: savedMessages,
+            characteristicJSFunction: characteristicJSFunction,
+            useJSFunction: useJSFunction,
+            notifyInterval: notifyInterval
         )
         
         do {
@@ -118,6 +134,10 @@ class DeviceSettings: ObservableObject {
             autoResponse = settings.autoResponse
             autoResponseText = settings.autoResponseText
             savedMessages = settings.savedMessages
+            characteristicJSFunction = settings.characteristicJSFunction
+            useJSFunction = settings.useJSFunction
+            notifyInterval = settings.notifyInterval
+            
             currentProfileName = profile
         } catch {
             print("Error loading settings profile '\(profile)': \(error.localizedDescription)")
@@ -171,6 +191,9 @@ class DeviceSettings: ObservableObject {
         characteristicUUID = "5FFE0001-5000-4000-3000-200000000000"
         autoResponse = true
         autoResponseText = "Hello from MacOS Simulator!"
+        characteristicJSFunction = "// Return value for read/notify\nreturn 'Value from JS: ' + new Date().toISOString();"
+        useJSFunction = false
+        notifyInterval = 1.0
         savedMessages = [
             "Hello!",
             "Test message",
