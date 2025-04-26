@@ -4,13 +4,29 @@ import SwiftUI
 /// Used for editing both read() and write() functions in a single editor.
 struct JSCodeEditor: View {
     @Binding var code: String
+    @State private var height: CGFloat = 200
+    
     var placeholder: String = ""
-    var height: CGFloat = 200
+    
     var body: some View {
-        TextEditor(text: $code)
-            .font(.system(.body, design: .monospaced))
-            .frame(height: height)
-            .border(Color.gray.opacity(0.3))
-            .disableAutocorrection(true)
+        VStack(alignment: .leading, spacing: 0) {
+            TextEditor(text: $code)
+                .font(.system(.body, design: .monospaced))
+                .frame(height: height)
+                .border(Color.gray.opacity(0.3))
+                .autocorrectionDisabled(true)
+                .textSelection(.enabled)
+            Rectangle()
+                .frame(height: 12)
+                .foregroundColor(.clear)
+                .background(Color.gray.opacity(0.15))
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let newHeight = max(100, height + value.translation.height)
+                            height = newHeight
+                        }
+                )
+        }
     }
 } 

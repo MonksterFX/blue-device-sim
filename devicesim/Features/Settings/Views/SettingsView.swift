@@ -153,6 +153,7 @@ struct AutoResponseSection: View {
 // MARK: - JavaScript Function Section
 struct JavaScriptFunctionSection: View {
     @ObservedObject var deviceSettings: DeviceSettings
+    
     @Binding var isShowingJSExamplesSheet: Bool
     
     @State private var testReadResult: String = ""
@@ -162,10 +163,11 @@ struct JavaScriptFunctionSection: View {
     @State private var isTestingInterval = false
     @State private var intervalTimer: Timer? = nil
     @State private var codeEditorHeight: CGFloat = 200
-    @GestureState private var dragOffset: CGFloat = 0
     @State private var testWriteInput: String = "test-value"
     @State private var jsFunctionsCode: String = "// Define both functions below\nfunction read(appStartTime, subscriptionTime) {\n    return 'Read value: ' + new Date().toISOString();\n}\n\nfunction write(appStartTime, subscriptionTime, value) {\n    console.log('Write value:', value);\n    return true;\n}"
     
+    @GestureState private var dragOffset: CGFloat = 0
+
     var body: some View {
         Section(header: Text("JavaScript Handler")) {
             Toggle("Use JavaScript Functions", isOn: $deviceSettings.useJSFunction)
@@ -192,7 +194,8 @@ struct JavaScriptFunctionSection: View {
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 }
-                JSCodeEditor(code: $jsFunctionsCode, height: codeEditorHeight)
+                
+                JSCodeEditor(code: $jsFunctionsCode)
                 
                 // --- Test Panel ---
                 VStack(alignment: .leading, spacing: 8) {
