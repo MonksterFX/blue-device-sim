@@ -9,28 +9,30 @@ struct SettingsView: View {
     @State private var newProfileName = ""
     
     var body: some View {
-        Form {
-            ProfileManagementSection(
-                deviceSettings: deviceSettings,
-                isShowingSaveProfileSheet: $isShowingSaveProfileSheet,
-                newProfileName: $newProfileName
-            )
+        ScrollView {
+            Form {
+                ProfileManagementSection(
+                    deviceSettings: deviceSettings,
+                    isShowingSaveProfileSheet: $isShowingSaveProfileSheet,
+                    newProfileName: $newProfileName
+                )
 
-            DeviceConfigurationSection(deviceSettings: deviceSettings)
-            
-            AutoResponseSection(deviceSettings: deviceSettings)
-            
-            JavaScriptFunctionSection(
-                deviceSettings: deviceSettings,
-                isShowingJSExamplesSheet: $isShowingJSExamplesSheet
-            )
-            
-            SavedMessagesSection(
-                deviceSettings: deviceSettings,
-                messageToSend: $messageToSend
-            )
+                DeviceConfigurationSection(deviceSettings: deviceSettings)
+                
+                AutoResponseSection(deviceSettings: deviceSettings)
+                
+                JavaScriptFunctionSection(
+                    deviceSettings: deviceSettings,
+                    isShowingJSExamplesSheet: $isShowingJSExamplesSheet
+                )
+                
+                SavedMessagesSection(
+                    deviceSettings: deviceSettings,
+                    messageToSend: $messageToSend
+                )
+            }
+            .padding()
         }
-        .padding()
         .sheet(isPresented: $isShowingSaveProfileSheet) {
             SaveProfileSheet(
                 isPresented: $isShowingSaveProfileSheet,
@@ -157,6 +159,8 @@ struct JavaScriptFunctionSection: View {
     @State private var testLogs: [String] = []
     @State private var isTestingInterval = false
     @State private var intervalTimer: Timer? = nil
+    @State private var codeEditorHeight: CGFloat = 200
+    @GestureState private var dragOffset: CGFloat = 0
     
     var body: some View {
         Section(header: Text("JavaScript Handler")) {
@@ -187,10 +191,32 @@ struct JavaScriptFunctionSection: View {
                     .controlSize(.small)
                 }
                 
-                TextEditor(text: $deviceSettings.characteristicJSFunction)
-                    .font(.system(.body, design: .monospaced))
-                    .frame(height: 200)
-                    .border(Color.gray.opacity(0.3))
+                VStack(spacing: 0) {
+                    TextEditor(text: $deviceSettings.characteristicJSFunction)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(height: codeEditorHeight)
+                        .border(Color.gray.opacity(0.3))
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 8)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .updating($dragOffset) { value, state, _ in
+                                    state = value.translation.height
+                                }
+                                .onChanged { value in
+                                    let newHeight = max(100, codeEditorHeight + value.translation.height)
+                                    codeEditorHeight = newHeight
+                                }
+                        )
+                        .overlay(
+                            Image(systemName: "line.horizontal.3")
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray), alignment: .center
+                        )
+                }
+                .cornerRadius(4)
+                .padding(.bottom, 4)
                 
                 // --- Test Panel ---
                 VStack(alignment: .leading, spacing: 8) {
