@@ -32,3 +32,6 @@ A macOS application that simulates a Bluetooth Low Energy (BLE) peripheral devic
 ## License
 
 MIT License 
+
+## AI Usage
+This repro is currently heavily developed with Cursor AI. Please not that there will be major structural changes at all times until rules, process and code style is etablished.
