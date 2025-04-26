@@ -4,88 +4,21 @@ struct JavaScriptExamplesView: View {
     @ObservedObject var deviceSettings: DeviceSettings
     @Environment(\.dismiss) private var dismiss
     
+    // Sample JS read/write function stubs
+    private let readStub = "// JS read function\nreturn 'Read value: ' + new Date().toISOString();"
+    private let writeStub = "// JS write function\nconsole.log('Write value:', value); return true;"
+    
     // Sample JS functions for different use cases
     private let examples = [
         Example(
-            name: "Basic read/notify function",
-            description: "Simple function that returns different values for read vs. notify operations",
-            code: """
-            // Return different values for read vs notify
-            if (isRead) {
-                return "This is a read value";
-            } else {
-                return "This is a notification at " + new Date().toISOString();
-            }
-            """
+            name: "Basic read/write functions",
+            description: "Separate functions for read and write operations. Use the parameters as shown.",
+            code: "// Read function\nfunction read(appStartTime, subscriptionTime) {\n    return 'Read value: ' + new Date().toISOString();\n}\n\n// Write function\nfunction write(appStartTime, subscriptionTime, value) {\n    console.log('Write value:', value);\n    return true;\n}"
         ),
         Example(
-            name: "Time-based value",
-            description: "Returns values based on time since app started and subscription",
-            code: """
-            // Calculate time difference in seconds
-            const now = new Date().getTime();
-            const appRuntime = Math.floor((now - appStartTime) / 1000);
-            let subscriptionRuntime = 0;
-            
-            if (subscriptionTime) {
-                subscriptionRuntime = Math.floor((now - subscriptionTime) / 1000);
-            }
-            
-            // Different responses for read vs notify
-            if (isRead) {
-                return `Read value - App running for ${appRuntime} seconds`;
-            } else {
-                return `Notification - Subscribed for ${subscriptionRuntime} seconds`;
-            }
-            """
-        ),
-        Example(
-            name: "Simulated sensor data (JSON)",
-            description: "Returns JSON data simulating a sensor with random noise",
-            code: """
-            // Generate simulated sensor data as JSON
-            const now = new Date().getTime();
-            
-            // Base value + random noise + sine wave
-            const subscriptionSecs = subscriptionTime ? (now - subscriptionTime) / 1000 : 0;
-            const baseValue = 25.0;
-            const noise = Math.random() * 0.5;
-            const wave = Math.sin(subscriptionSecs * 0.1) * 2;
-            
-            // Calculate the final value
-            const sensorValue = baseValue + noise + wave;
-            
-            // Return a data object
-            return {
-                timestamp: now,
-                value: sensorValue.toFixed(2),
-                unit: "°C",
-                type: isRead ? "read" : "notification",
-                battery: 85 - (subscriptionSecs * 0.01)
-            };
-            """
-        ),
-        Example(
-            name: "Counter with battery simulation",
-            description: "Simulates a device with a counter and decreasing battery",
-            code: """
-            // Simple counter with battery level simulation
-            const now = new Date().getTime();
-            const appRuntimeMins = (now - appStartTime) / (1000 * 60);
-            
-            // Counter increases each notification
-            let counter = isRead ? 0 : Math.floor((now - subscriptionTime) / (deviceSettings.notifyInterval * 1000));
-            
-            // Battery decreases over time (100% to 0% in about 8 hours)
-            const batteryLevel = Math.max(0, Math.floor(100 - (appRuntimeMins / 4.8)));
-            
-            return {
-                counter: counter,
-                battery: batteryLevel,
-                timestamp: now,
-                mode: isRead ? "read" : "notify"
-            };
-            """
+            name: "Time-based read, log write",
+            description: "Read returns time since app start, write logs the value.",
+            code: "// Read function\nfunction read(appStartTime, subscriptionTime) {\n    const now = new Date().getTime();\n    const appRuntime = Math.floor((now - appStartTime) / 1000);\n    return `App running for ${appRuntime} seconds`;\n}\n\n// Write function\nfunction write(appStartTime, subscriptionTime, value) {\n    console.log('Received write at', new Date().toISOString(), 'with value:', value);\n    return { status: 'ok', written: value };\n}"
         )
     ]
     
@@ -94,16 +27,16 @@ struct JavaScriptExamplesView: View {
             Text("JavaScript Function Examples")
                 .font(.title2)
                 .padding(.bottom, 10)
-            
-            Text("Select an example to use as a starting point for your characteristic function.")
+            Text("You must now define two separate functions: \n\n• read(appStartTime, subscriptionTime): called on read/notify\n• write(appStartTime, subscriptionTime, value): called on write\n\nIf you load an old profile, its single function will be used for both read and write. Edit as needed.")
                 .foregroundColor(.secondary)
                 .padding(.bottom, 20)
-            
             ScrollView {
                 VStack(spacing: 20) {
                     ForEach(examples) { example in
                         ExampleCard(example: example) {
-                            deviceSettings.characteristicJSFunction = example.code
+                            // Insert both stubs into the settings
+                            deviceSettings.characteristicJSReadFunction = readStub
+                            deviceSettings.characteristicJSWriteFunction = writeStub
                             deviceSettings.useJSFunction = true
                             deviceSettings.saveSettings(as: deviceSettings.currentProfileName)
                             dismiss()
@@ -112,9 +45,16 @@ struct JavaScriptExamplesView: View {
                 }
                 .padding(.bottom, 20)
             }
-            
             HStack {
                 Spacer()
+                Button("Insert Default Stubs") {
+                    deviceSettings.characteristicJSReadFunction = readStub
+                    deviceSettings.characteristicJSWriteFunction = writeStub
+                    deviceSettings.useJSFunction = true
+                    deviceSettings.saveSettings(as: deviceSettings.currentProfileName)
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
                 Button("Close") {
                     dismiss()
                 }

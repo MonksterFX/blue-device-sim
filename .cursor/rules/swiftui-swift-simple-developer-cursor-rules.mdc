@@ -1,6 +1,6 @@
 ---
 description: SwiftUI Swift Simple Cursor Rules
-globs:
+globs: 
 alwaysApply: false
 ---
 You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines:
@@ -40,7 +40,7 @@ You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines
   - SafeArea and GeometryReader for layout
   - Handle all screen sizes and orientations
   - Implement proper keyboard handling
-
+  - Practice component based design
 
   # Performance
 

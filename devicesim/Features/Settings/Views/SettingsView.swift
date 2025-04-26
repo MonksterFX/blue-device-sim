@@ -155,16 +155,20 @@ struct JavaScriptFunctionSection: View {
     @ObservedObject var deviceSettings: DeviceSettings
     @Binding var isShowingJSExamplesSheet: Bool
     
-    @State private var testResult: String = ""
-    @State private var testLogs: [String] = []
+    @State private var testReadResult: String = ""
+    @State private var testReadLogs: [String] = []
+    @State private var testWriteResult: String = ""
+    @State private var testWriteLogs: [String] = []
     @State private var isTestingInterval = false
     @State private var intervalTimer: Timer? = nil
     @State private var codeEditorHeight: CGFloat = 200
     @GestureState private var dragOffset: CGFloat = 0
+    @State private var testWriteInput: String = "test-value"
+    @State private var jsFunctionsCode: String = "// Define both functions below\nfunction read(appStartTime, subscriptionTime) {\n    return 'Read value: ' + new Date().toISOString();\n}\n\nfunction write(appStartTime, subscriptionTime, value) {\n    console.log('Write value:', value);\n    return true;\n}"
     
     var body: some View {
         Section(header: Text("JavaScript Handler")) {
-            Toggle("Use JavaScript Function", isOn: $deviceSettings.useJSFunction)
+            Toggle("Use JavaScript Functions", isOn: $deviceSettings.useJSFunction)
             
             if deviceSettings.useJSFunction {
                 VStack(alignment: .leading, spacing: 5) {
@@ -178,51 +182,30 @@ struct JavaScriptFunctionSection: View {
                 }
                 
                 HStack {
-                    Text("JavaScript Function")
+                    Text("JavaScript Functions (define both read and write)")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
                     Spacer()
-                    
-                    Button("See Examples") {
-                        isShowingJSExamplesSheet = true
+                    Button("Insert Default Stubs") {
+                        jsFunctionsCode = "// Define both functions below\nfunction read(appStartTime, subscriptionTime) {\n    return 'Read value: ' + new Date().toISOString();\n}\n\nfunction write(appStartTime, subscriptionTime, value) {\n    console.log('Write value:', value);\n    return true;\n}"
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 }
-                
-                VStack(spacing: 0) {
-                    TextEditor(text: $deviceSettings.characteristicJSFunction)
-                        .font(.system(.body, design: .monospaced))
-                        .frame(height: codeEditorHeight)
-                        .border(Color.gray.opacity(0.3))
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 8)
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .updating($dragOffset) { value, state, _ in
-                                    state = value.translation.height
-                                }
-                                .onChanged { value in
-                                    let newHeight = max(100, codeEditorHeight + value.translation.height)
-                                    codeEditorHeight = newHeight
-                                }
-                        )
-                        .overlay(
-                            Image(systemName: "line.horizontal.3")
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray), alignment: .center
-                        )
-                }
-                .cornerRadius(4)
-                .padding(.bottom, 4)
+                JSCodeEditor(code: $jsFunctionsCode, height: codeEditorHeight)
                 
                 // --- Test Panel ---
                 VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Write Test Value:")
+                            .font(.caption)
+                        TextField("Enter value", text: $testWriteInput)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.system(.body, design: .monospaced))
+                    }
                     HStack(spacing: 12) {
                         Button("Test Read") {
-                            runJSTest(isRead: true)
+                            runJSTestRead()
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(isTestingInterval)
@@ -235,13 +218,16 @@ struct JavaScriptFunctionSection: View {
                             }
                         }
                         .buttonStyle(.bordered)
+                        Button("Test Write") {
+                            runJSTestWrite()
+                        }
+                        .buttonStyle(.bordered)
                     }
-                    
-                    Text("Result:")
+                    Text("Read Result:")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     ScrollView {
-                        Text(testResult)
+                        Text(testReadResult)
                             .font(.system(.body, design: .monospaced))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(6)
@@ -249,13 +235,38 @@ struct JavaScriptFunctionSection: View {
                             .cornerRadius(6)
                     }
                     .frame(height: 60)
-                    
-                    Text("Console.log output:")
+                    Text("Read Console.log output:")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     ScrollView {
                         VStack(alignment: .leading, spacing: 2) {
-                            ForEach(testLogs, id: \.self) { log in
+                            ForEach(testReadLogs, id: \.self) { log in
+                                Text(log)
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(6)
+                    }
+                    .frame(height: 60)
+                    Text("Write Result:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    ScrollView {
+                        Text(testWriteResult)
+                            .font(.system(.body, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(6)
+                            .background(Color.gray.opacity(0.08))
+                            .cornerRadius(6)
+                    }
+                    .frame(height: 60)
+                    Text("Write Console.log output:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(testWriteLogs, id: \.self) { log in
                                 Text(log)
                                     .font(.system(.caption, design: .monospaced))
                                     .foregroundColor(.blue)
@@ -267,90 +278,63 @@ struct JavaScriptFunctionSection: View {
                 }
                 .padding(.vertical, 8)
                 
-                Text("Available JavaScript Context")
+                Text("Available JavaScript Function Signatures")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.top, 5)
-                
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("• appStartTime: Application start time in milliseconds")
+                    Text("• read(appStartTime: number, subscriptionTime: number): any")
                         .font(.caption)
-                    Text("• subscriptionTime: First subscription time in milliseconds")
-                        .font(.caption)
-                    Text("• isRead: true for read requests, false for notifications")
+                    Text("• write(appStartTime: number, subscriptionTime: number, value: string): any")
                         .font(.caption)
                     Text("• Return value as string, number or object to send to client")
                         .font(.caption)
                 }
                 .padding(.leading, 10)
-                
-                // Example button
-                Button("Insert Example Function") {
-                    deviceSettings.characteristicJSFunction = """
-                    // Calculate time difference in seconds
-                    const now = new Date().getTime();
-                    const appRuntime = Math.floor((now - appStartTime) / 1000);
-                    let subscriptionRuntime = 0;
-                    
-                    if (subscriptionTime) {
-                        subscriptionRuntime = Math.floor((now - subscriptionTime) / 1000);
-                    }
-                    
-                    // Different responses for read vs notify
-                    if (isRead) {
-                        return `Read value - App running for ${appRuntime} seconds`;
-                    } else {
-                        // For notifications, return a dynamic value
-                        return {
-                            timestamp: now,
-                            subscribed_for: subscriptionRuntime,
-                            operation: "notification",
-                            value: Math.sin(subscriptionRuntime * 0.1) * 100
-                        };
-                    }
-                    """
-                }
-                .buttonStyle(.bordered)
-                .padding(.top, 5)
             }
         }
     }
-    
     // --- JS Test Harness ---
-    private func runJSTest(isRead: Bool) {
-        testLogs = []
-        let (result, logs) = JavaScriptTestHarness.run(
-            jsFunction: deviceSettings.characteristicJSFunction,
-            isRead: isRead,
+    private func runJSTestRead() {
+        testReadLogs = []
+        let (result, logs) = JavaScriptTestHarness.runReadFromCombinedCode(
+            jsFunctionsCode: jsFunctionsCode,
             notifyInterval: deviceSettings.notifyInterval
         )
-        testResult = result
-        testLogs = logs
+        testReadResult = result
+        testReadLogs = logs
     }
-    
+    private func runJSTestWrite() {
+        testWriteLogs = []
+        let (result, logs) = JavaScriptTestHarness.runWriteFromCombinedCode(
+            jsFunctionsCode: jsFunctionsCode,
+            value: testWriteInput,
+            notifyInterval: deviceSettings.notifyInterval
+        )
+        testWriteResult = result
+        testWriteLogs = logs
+    }
     private func startIntervalTest() {
-        testLogs = []
-        testResult = ""
+        testReadLogs = []
+        testReadResult = ""
         isTestingInterval = true
         var count = 0
         let startTime = Date()
         intervalTimer = Timer.scheduledTimer(withTimeInterval: deviceSettings.notifyInterval, repeats: true) { _ in
-            let (result, logs) = JavaScriptTestHarness.run(
-                jsFunction: deviceSettings.characteristicJSFunction,
-                isRead: false,
+            let (result, logs) = JavaScriptTestHarness.runReadFromCombinedCode(
+                jsFunctionsCode: jsFunctionsCode,
                 notifyInterval: deviceSettings.notifyInterval,
                 appStartTime: startTime,
                 subscriptionTime: startTime
             )
-            testResult = result
-            testLogs = logs
+            testReadResult = result
+            testReadLogs = logs
             count += 1
             if count >= 10 { // Stop after 10 intervals
                 stopIntervalTest()
             }
         }
     }
-    
     private func stopIntervalTest() {
         intervalTimer?.invalidate()
         intervalTimer = nil
@@ -363,7 +347,6 @@ struct JavaScriptTestHarness {
     static func run(jsFunction: String, isRead: Bool, notifyInterval: Double, appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String, [String]) {
         var logs: [String] = []
         let context = JSContext()!
-        // Capture console.log
         let consoleLog: @convention(block) (String) -> Void = { message in
             logs.append(message)
         }
@@ -374,16 +357,20 @@ struct JavaScriptTestHarness {
                 logs.append("JS Error: \(exc.toString() ?? "Unknown error")")
             }
         }
-        // Add the function
-        context.evaluateScript("""
-        function evaluateCharacteristicFunction(appStartTime, subscriptionTime, isRead) {
-            \(jsFunction)
+        // Add the function as a read or write function
+        if isRead {
+            context.evaluateScript("function read(appStartTime, subscriptionTime) {\n\(jsFunction)\n}")
+        } else {
+            context.evaluateScript("function write(appStartTime, subscriptionTime, value) {\n\(jsFunction)\n}")
         }
-        """)
-        // Prepare arguments
         let appStartTimeMs = appStartTime.timeIntervalSince1970 * 1000
         let subscriptionTimeMs = subscriptionTime.timeIntervalSince1970 * 1000
-        let jsCall = "evaluateCharacteristicFunction(\(appStartTimeMs), \(subscriptionTimeMs), \(isRead))"
+        let jsCall: String
+        if isRead {
+            jsCall = "read(\(appStartTimeMs), \(subscriptionTimeMs))"
+        } else {
+            jsCall = "write(\(appStartTimeMs), \(subscriptionTimeMs), 'test-value')"
+        }
         let result = context.evaluateScript(jsCall)
         var resultString = ""
         if let result = result {
@@ -392,7 +379,126 @@ struct JavaScriptTestHarness {
             } else if result.isNumber {
                 resultString = "\(result.toNumber() ?? 0)"
             } else if result.isObject {
-                let stringifyCall = "JSON.stringify(evaluateCharacteristicFunction(\(appStartTimeMs), \(subscriptionTimeMs), \(isRead)))"
+                let stringifyCall = "JSON.stringify(\(jsCall))"
+                let jsonResult = context.evaluateScript(stringifyCall)
+                resultString = jsonResult?.toString() ?? "[object]"
+            } else if result.isUndefined || result.isNull {
+                resultString = "undefined"
+            } else {
+                resultString = result.toString() ?? ""
+            }
+        }
+        return (resultString, logs)
+    }
+    
+    static func runRead(jsReadFunction: String, notifyInterval: Double, appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String, [String]) {
+        return run(jsFunction: jsReadFunction, isRead: true, notifyInterval: notifyInterval, appStartTime: appStartTime, subscriptionTime: subscriptionTime)
+    }
+    
+    static func runWrite(jsWriteFunction: String, value: String, notifyInterval: Double, appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String, [String]) {
+        var logs: [String] = []
+        let context = JSContext()!
+        let consoleLog: @convention(block) (String) -> Void = { message in
+            logs.append(message)
+        }
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString)
+        context.evaluateScript("console = { log: consoleLog }")
+        context.exceptionHandler = { _, exception in
+            if let exc = exception {
+                logs.append("JS Error: \(exc.toString() ?? "Unknown error")")
+            }
+        }
+        context.evaluateScript("function write(appStartTime, subscriptionTime, value) {\n\(jsWriteFunction)\n}")
+        let appStartTimeMs = appStartTime.timeIntervalSince1970 * 1000
+        let subscriptionTimeMs = subscriptionTime.timeIntervalSince1970 * 1000
+        let jsCall = "write(\(appStartTimeMs), \(subscriptionTimeMs), 'test-value')"
+        let result = context.evaluateScript(jsCall)
+        var resultString = ""
+        if let result = result {
+            if result.isString {
+                resultString = result.toString() ?? ""
+            } else if result.isNumber {
+                resultString = "\(result.toNumber() ?? 0)"
+            } else if result.isObject {
+                let stringifyCall = "JSON.stringify(\(jsCall))"
+                let jsonResult = context.evaluateScript(stringifyCall)
+                resultString = jsonResult?.toString() ?? "[object]"
+            } else if result.isUndefined || result.isNull {
+                resultString = "undefined"
+            } else {
+                resultString = result.toString() ?? ""
+            }
+        }
+        return (resultString, logs)
+    }
+    
+    static func runReadFromCombinedCode(jsFunctionsCode: String, notifyInterval: Double, appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String, [String]) {
+        var logs: [String] = []
+        let context = JSContext()!
+        let consoleLog: @convention(block) (String) -> Void = { message in
+            logs.append(message)
+        }
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString)
+        context.evaluateScript("console = { log: consoleLog }")
+        context.exceptionHandler = { _, exception in
+            if let exc = exception {
+                logs.append("JS Error: \(exc.toString() ?? "Unknown error")")
+            }
+        }
+        // Evaluate the combined code (should define both functions)
+        context.evaluateScript(jsFunctionsCode)
+        let appStartTimeMs = appStartTime.timeIntervalSince1970 * 1000
+        let subscriptionTimeMs = subscriptionTime.timeIntervalSince1970 * 1000
+        let jsCall = "read(\(appStartTimeMs), \(subscriptionTimeMs))"
+        let result = context.evaluateScript(jsCall)
+        var resultString = ""
+        if let result = result {
+            if result.isString {
+                resultString = result.toString() ?? ""
+            } else if result.isNumber {
+                resultString = "\(result.toNumber() ?? 0)"
+            } else if result.isObject {
+                let stringifyCall = "JSON.stringify(\(jsCall))"
+                let jsonResult = context.evaluateScript(stringifyCall)
+                resultString = jsonResult?.toString() ?? "[object]"
+            } else if result.isUndefined || result.isNull {
+                resultString = "undefined"
+            } else {
+                resultString = result.toString() ?? ""
+            }
+        }
+        return (resultString, logs)
+    }
+    
+    static func runWriteFromCombinedCode(jsFunctionsCode: String, value: String, notifyInterval: Double, appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String, [String]) {
+        var logs: [String] = []
+        let context = JSContext()!
+        let consoleLog: @convention(block) (String) -> Void = { message in
+            logs.append(message)
+        }
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString)
+        context.evaluateScript("console = { log: consoleLog }")
+        context.exceptionHandler = { _, exception in
+            if let exc = exception {
+                logs.append("JS Error: \(exc.toString() ?? "Unknown error")")
+            }
+        }
+        // Evaluate the combined code (should define both functions)
+        context.evaluateScript(jsFunctionsCode)
+        let appStartTimeMs = appStartTime.timeIntervalSince1970 * 1000
+        let subscriptionTimeMs = subscriptionTime.timeIntervalSince1970 * 1000
+        // Escape value for JS string
+        let escapedValue = value.replacingOccurrences(of: "'", with: "\\'")
+        let jsCall = "write(\(appStartTimeMs), \(subscriptionTimeMs), '\(escapedValue)')"
+        let result = context.evaluateScript(jsCall)
+        var resultString = ""
+        if let result = result {
+            if result.isString {
+                resultString = result.toString() ?? ""
+            } else if result.isNumber {
+                resultString = "\(result.toNumber() ?? 0)"
+            } else if result.isObject {
+                let stringifyCall = "JSON.stringify(\(jsCall))"
                 let jsonResult = context.evaluateScript(stringifyCall)
                 resultString = jsonResult?.toString() ?? "[object]"
             } else if result.isUndefined || result.isNull {

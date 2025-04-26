@@ -6,10 +6,12 @@ class CharacteristicHandler {
     enum OperationType: String {
         case read
         case notify
+        case write
     }
     
-    /// The JavaScript function to execute
-    let jsFunction: String
+    /// The JavaScript read and write functions to execute
+    let jsReadFunction: String
+    let jsWriteFunction: String
     
     /// The notification interval in seconds (only used for notify characteristics)
     let notifyInterval: TimeInterval
@@ -29,9 +31,10 @@ class CharacteristicHandler {
     /// Timer for sending notifications at intervals
     private var notificationTimer: Timer?
     
-    init(characteristicUUID: String, jsFunction: String, notifyInterval: TimeInterval = 1.0) {
+    init(characteristicUUID: String, jsReadFunction: String, jsWriteFunction: String, notifyInterval: TimeInterval = 1.0) {
         self.characteristicUUID = characteristicUUID
-        self.jsFunction = jsFunction
+        self.jsReadFunction = jsReadFunction
+        self.jsWriteFunction = jsWriteFunction
         self.notifyInterval = notifyInterval
         self.appStartTime = Date()
         
@@ -54,10 +57,13 @@ class CharacteristicHandler {
             }
         }
         
-        // Add the function to the context
+        // Add the read and write functions to the context
         jsContext.evaluateScript("""
-        function evaluateCharacteristicFunction(appStartTime, subscriptionTime, isRead) {
-            \(jsFunction)
+        function read(appStartTime, subscriptionTime) {
+            \(jsReadFunction)
+        }
+        function write(appStartTime, subscriptionTime, value) {
+            \(jsWriteFunction)
         }
         """)
     }
@@ -69,9 +75,14 @@ class CharacteristicHandler {
         }
     }
     
-    /// Evaluates the JavaScript function for a read request
+    /// Evaluates the JavaScript read function for a read request
     func handleReadRequest() -> Data? {
         return evaluateJS(operationType: .read)
+    }
+    
+    /// Evaluates the JavaScript write function for a write request
+    func handleWriteRequest(value: String) -> Data? {
+        return evaluateJS(operationType: .write, value: value)
     }
     
     /// Starts sending notifications at the specified interval
@@ -97,35 +108,32 @@ class CharacteristicHandler {
     }
     
     /// Evaluates the JavaScript function and returns the result as Data
-    private func evaluateJS(operationType: OperationType) -> Data? {
-        // Convert dates to milliseconds since epoch for JavaScript
+    private func evaluateJS(operationType: OperationType, value: String? = nil) -> Data? {
         let appStartTimeMs = appStartTime.timeIntervalSince1970 * 1000
         let subscriptionTimeMs = (firstSubscriptionTime ?? Date()).timeIntervalSince1970 * 1000
-        let isRead = operationType == .read
-        
-        // Call the function with the required parameters
-        let jsCall = "evaluateCharacteristicFunction(\(appStartTimeMs), \(subscriptionTimeMs), \(isRead))"
+        let jsCall: String
+        switch operationType {
+        case .read, .notify:
+            jsCall = "read(\(appStartTimeMs), \(subscriptionTimeMs))"
+        case .write:
+            let valueArg = value != nil ? "`\(value!)`" : "''"
+            jsCall = "write(\(appStartTimeMs), \(subscriptionTimeMs), \(valueArg))"
+        }
         guard let result = jsContext.evaluateScript(jsCall) else {
             return nil
         }
-        
-        // Convert result to string then to data
         if result.isString {
             return result.toString()?.data(using: .utf8)
         } else if result.isNumber {
             let numberValue = result.toNumber()
             return "\(numberValue ?? 0)".data(using: .utf8)
         } else if result.isObject {
-            // Try to stringify if it's an object
-            // Note: We need to call the function again inside stringify to get the object result
-            let stringifyCall = "JSON.stringify(evaluateCharacteristicFunction(\(appStartTimeMs), \(subscriptionTimeMs), \(isRead)))"
+            let stringifyCall = "JSON.stringify(\(jsCall))"
             let jsonResult = jsContext.evaluateScript(stringifyCall)
             return jsonResult?.toString()?.data(using: .utf8)
         } else if result.isUndefined || result.isNull {
-             return nil // Return nil or empty data for undefined/null
+            return nil
         }
-        
-        // Fallback for other types (like boolean)
         return result.toString()?.data(using: .utf8)
     }
 } 

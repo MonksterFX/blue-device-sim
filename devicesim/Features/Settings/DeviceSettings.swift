@@ -7,14 +7,15 @@ struct DeviceSettingsData: Codable {
     var autoResponse: Bool
     var autoResponseText: String
     var savedMessages: [String]
-    var characteristicJSFunction: String
+    var characteristicJSReadFunction: String
+    var characteristicJSWriteFunction: String
     var useJSFunction: Bool
     var notifyInterval: Double
     let createdAt: Date
     
     init(deviceName: String, serviceUUID: String, characteristicUUID: String, 
          autoResponse: Bool, autoResponseText: String, savedMessages: [String],
-         characteristicJSFunction: String = "", useJSFunction: Bool = false,
+         characteristicJSReadFunction: String = "", characteristicJSWriteFunction: String = "", useJSFunction: Bool = false,
          notifyInterval: Double = 1.0) {
         self.deviceName = deviceName
         self.serviceUUID = serviceUUID
@@ -22,7 +23,8 @@ struct DeviceSettingsData: Codable {
         self.autoResponse = autoResponse
         self.autoResponseText = autoResponseText
         self.savedMessages = savedMessages
-        self.characteristicJSFunction = characteristicJSFunction
+        self.characteristicJSReadFunction = characteristicJSReadFunction
+        self.characteristicJSWriteFunction = characteristicJSWriteFunction
         self.useJSFunction = useJSFunction
         self.notifyInterval = notifyInterval
         self.createdAt = Date()
@@ -38,9 +40,10 @@ class DeviceSettings: ObservableObject {
     @Published var currentProfileName: String = "default"
     
     // New JavaScript function properties
-    @Published var characteristicJSFunction: String = "// Return value for read/notify\nreturn 'Value from JS: ' + new Date().toISOString();"
-    @Published var useJSFunction: Bool = false
-    @Published var notifyInterval: Double = 1.0
+    @Published var characteristicJSReadFunction: String = "// JS read function\nreturn 'Read value: ' + new Date().toISOString();"
+    @Published var characteristicJSWriteFunction: String = "// JS write function\nconsole.log('Write value:', value); return true;"
+    // Deprecated, for migration only
+    @Published var characteristicJSFunction: String = ""
     
     // Saved message templates for quick sending
     @Published var savedMessages: [String] = [
@@ -49,6 +52,11 @@ class DeviceSettings: ObservableObject {
         "Status: OK",
         "Battery: 100%"
     ]
+    
+    // Add this property for notifyInterval
+    @Published var notifyInterval: Double = 1.0
+    // Add this property for useJSFunction
+    @Published var useJSFunction: Bool = false
     
     private let fileManager = FileManager.default
     private var settingsDirectory: URL {
@@ -95,7 +103,8 @@ class DeviceSettings: ObservableObject {
             autoResponse: autoResponse,
             autoResponseText: autoResponseText,
             savedMessages: savedMessages,
-            characteristicJSFunction: characteristicJSFunction,
+            characteristicJSReadFunction: characteristicJSReadFunction,
+            characteristicJSWriteFunction: characteristicJSWriteFunction,
             useJSFunction: useJSFunction,
             notifyInterval: notifyInterval
         )
@@ -121,27 +130,43 @@ class DeviceSettings: ObservableObject {
             }
             return
         }
-        
         do {
             let data = try Data(contentsOf: fileURL)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let settings = try decoder.decode(DeviceSettingsData.self, from: data)
-            
             deviceName = settings.deviceName
             serviceUUID = settings.serviceUUID
             characteristicUUID = settings.characteristicUUID
             autoResponse = settings.autoResponse
             autoResponseText = settings.autoResponseText
             savedMessages = settings.savedMessages
-            characteristicJSFunction = settings.characteristicJSFunction
             useJSFunction = settings.useJSFunction
             notifyInterval = settings.notifyInterval
-            
+            // Migration logic for JS functions
+            if !settings.characteristicJSReadFunction.isEmpty || !settings.characteristicJSWriteFunction.isEmpty {
+                characteristicJSReadFunction = settings.characteristicJSReadFunction
+                characteristicJSWriteFunction = settings.characteristicJSWriteFunction
+            } else if let legacyJS = (dataToLegacyJSFunction(data: data)) {
+                characteristicJSReadFunction = legacyJS
+                characteristicJSWriteFunction = legacyJS
+            } else {
+                characteristicJSReadFunction = "// JS read function\nreturn 'Read value: ' + new Date().toISOString();"
+                characteristicJSWriteFunction = "// JS write function\nconsole.log('Write value:', value); return true;"
+            }
             currentProfileName = profile
         } catch {
             print("Error loading settings profile '\(profile)': \(error.localizedDescription)")
         }
+    }
+    
+    /// Helper to extract legacy characteristicJSFunction from raw data if present
+    private func dataToLegacyJSFunction(data: Data) -> String? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        if let legacy = json["characteristicJSFunction"] as? String, !legacy.isEmpty {
+            return legacy
+        }
+        return nil
     }
     
     func listProfiles() -> [(name: String, createdAt: Date)] {
@@ -191,7 +216,8 @@ class DeviceSettings: ObservableObject {
         characteristicUUID = "5FFE0001-5000-4000-3000-200000000000"
         autoResponse = true
         autoResponseText = "Hello from MacOS Simulator!"
-        characteristicJSFunction = "// Return value for read/notify\nreturn 'Value from JS: ' + new Date().toISOString();"
+        characteristicJSReadFunction = "// JS read function\nreturn 'Read value: ' + new Date().toISOString();"
+        characteristicJSWriteFunction = "// JS write function\nconsole.log('Write value:', value); return true;"
         useJSFunction = false
         notifyInterval = 1.0
         savedMessages = [

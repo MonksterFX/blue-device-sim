@@ -163,18 +163,15 @@ class BluetoothManager: NSObject, ObservableObject {
     
     private func updateJSHandler() {
         guard let settings = deviceSettings, settings.useJSFunction else {
-            // Remove any existing handler if not using JS function
             characteristicHandlerManager.removeHandler(characteristicUUID: characteristicUUID.uuidString)
             return
         }
-        
-        // Add or update the handler with the current settings
         characteristicHandlerManager.updateHandler(
             characteristicUUID: characteristicUUID.uuidString,
-            jsFunction: settings.characteristicJSFunction,
+            jsReadFunction: settings.characteristicJSReadFunction,
+            jsWriteFunction: settings.characteristicJSWriteFunction,
             notifyInterval: settings.notifyInterval
         )
-        
         addLog("Updated JavaScript handler for characteristic")
     }
     
@@ -290,13 +287,16 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
             if let value = request.value, request.characteristic.uuid == characteristicUUID {
                 let stringValue = String(data: value, encoding: .utf8) ?? "Unknown format data"
                 addLog("Received write: \(stringValue)")
-                
-                // Echo back the data to the central as a notification
-                sendData(value)
+                if let settings = deviceSettings, settings.useJSFunction {
+                    if let jsResponse = characteristicHandlerManager.handleWriteRequest(characteristicUUID: characteristicUUID.uuidString, value: stringValue) {
+                        sendData(jsResponse)
+                        addLog("Responded to write with JS function result")
+                    }
+                } else {
+                    sendData(value)
+                }
             }
         }
-        
-        // Respond to the request
         peripheral.respond(to: requests.first!, withResult: .success)
     }
 } 

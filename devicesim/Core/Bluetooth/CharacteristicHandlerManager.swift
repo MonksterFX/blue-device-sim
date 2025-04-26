@@ -14,10 +14,11 @@ class CharacteristicHandlerManager: ObservableObject {
     }
     
     /// Adds a new characteristic handler
-    func addHandler(characteristicUUID: String, jsFunction: String, notifyInterval: TimeInterval = 1.0) {
+    func addHandler(characteristicUUID: String, jsReadFunction: String, jsWriteFunction: String, notifyInterval: TimeInterval = 1.0) {
         let handler = CharacteristicHandler(
             characteristicUUID: characteristicUUID,
-            jsFunction: jsFunction,
+            jsReadFunction: jsReadFunction,
+            jsWriteFunction: jsWriteFunction,
             notifyInterval: notifyInterval
         )
         handlers[characteristicUUID] = handler
@@ -58,26 +59,28 @@ class CharacteristicHandlerManager: ObservableObject {
         return handler.handleReadRequest()
     }
     
+    /// Handles a write request for a characteristic
+    func handleWriteRequest(characteristicUUID: String, value: String) -> Data? {
+        guard let handler = handlers[characteristicUUID] else { return nil }
+        return handler.handleWriteRequest(value: value)
+    }
+    
     /// Updates the JavaScript function for a handler
-    func updateHandler(characteristicUUID: String, jsFunction: String, notifyInterval: TimeInterval? = nil) {
-        // If handler exists, create a new one with the updated function
+    func updateHandler(characteristicUUID: String, jsReadFunction: String, jsWriteFunction: String, notifyInterval: TimeInterval? = nil) {
         if handlers[characteristicUUID] != nil {
             let interval = notifyInterval ?? handlers[characteristicUUID]!.notifyInterval
-            
-            // Create new handler with updated function
             let handler = CharacteristicHandler(
                 characteristicUUID: characteristicUUID,
-                jsFunction: jsFunction,
+                jsReadFunction: jsReadFunction,
+                jsWriteFunction: jsWriteFunction,
                 notifyInterval: interval
             )
-            
-            // Replace the existing handler
             handlers[characteristicUUID] = handler
         } else {
-            // Create a new handler if one doesn't exist
             addHandler(
                 characteristicUUID: characteristicUUID,
-                jsFunction: jsFunction,
+                jsReadFunction: jsReadFunction,
+                jsWriteFunction: jsWriteFunction,
                 notifyInterval: notifyInterval ?? 1.0
             )
         }
