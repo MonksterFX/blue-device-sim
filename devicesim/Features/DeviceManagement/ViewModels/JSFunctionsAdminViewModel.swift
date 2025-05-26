@@ -1,3 +1,4 @@
+import CryptoKit
 //
 //  JSFunctionsAdminViewModel.swift
 //  devicesim
@@ -11,7 +12,7 @@ struct JSPreset: Codable, Identifiable, Hashable {
     let name: String
     let code: String
     let description: String
-    
+
     init(id: UUID = UUID(), name: String, code: String = "", description: String = "") {
         self.id = id
         self.name = name
@@ -37,39 +38,47 @@ class JSFunctionsAdminViewModel {
     var showInvalidNameAlert: Bool = false
     var showNewPresetAlert: Bool = false
     var newPresetName: String = ""
+
+    // js engine context
     var context: JavaScriptEngine? = nil
-    
+
+    // change detection
+    var initialCodeHash: String = ""
+    var hasUnsavedChanges: Bool = false
+    var showUnsavedChangesAlert: Bool = false
+    var pendingPreset: JSPreset? = nil
+
     private let fileManager = FileManager.default
     private var presetsDirectory: URL {
         let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsPath.appendingPathComponent("JSFunctionPresets", isDirectory: true)
     }
-    
+
     enum OperationType: String, CaseIterable, Identifiable {
         case read = "Read"
         case write = "Write"
         case notify = "Notify"
         var id: String { rawValue }
     }
-    
+
     init() {
         logStream.append("Presets directory: \(presetsDirectory.path)")
         loadPresetsFromDisk()
     }
-    
-    func selectPreset(_ id: UUID){
-        selectedPreset = presets.first(where: { $0.id == id })
-    }
-    
+
     func loadPresetsFromDisk() {
         do {
             if !fileManager.fileExists(atPath: presetsDirectory.path) {
-                try fileManager.createDirectory(at: presetsDirectory, withIntermediateDirectories: true)
+                try fileManager.createDirectory(
+                    at: presetsDirectory, withIntermediateDirectories: true)
             }
-            let files = try fileManager.contentsOfDirectory(at: presetsDirectory, includingPropertiesForKeys: nil)
+            let files = try fileManager.contentsOfDirectory(
+                at: presetsDirectory, includingPropertiesForKeys: nil)
             let jsonFiles = files.filter { $0.pathExtension == "json" }
             let loadedPresets: [JSPreset] = jsonFiles.compactMap { url in
-                guard let data = try? Data(contentsOf: url), let preset = try? JSONDecoder().decode(JSPreset.self, from: data) else { return nil }
+                guard let data = try? Data(contentsOf: url),
+                    let preset = try? JSONDecoder().decode(JSPreset.self, from: data)
+                else { return nil }
                 return preset
             }
             presets = loadedPresets
@@ -82,34 +91,53 @@ class JSFunctionsAdminViewModel {
             logStream.append("Failed to load presets: \(error.localizedDescription)")
         }
     }
-    
+
     func selectPreset(_ preset: JSPreset) {
+        if hasUnsavedChanges {
+            pendingPreset = preset
+            showUnsavedChangesAlert = true
+            return
+        }
+
         selectedPreset = preset
+        loadPreset(preset: preset)
+    }
+
+    private func loadPreset(preset: JSPreset) {
         let fileURL = presetsDirectory.appendingPathComponent(createPresetFileName(preset: preset))
-        if let data = try? Data(contentsOf: fileURL), let loaded = try? JSONDecoder().decode(JSPreset.self, from: data) {
+        if let data = try? Data(contentsOf: fileURL),
+            let loaded = try? JSONDecoder().decode(JSPreset.self, from: data)
+        {
             jsCode = loaded.code
             description = loaded.description
         } else {
             jsCode = ""
             description = ""
         }
+        initialCodeHash = HashUtils.sha256(jsCode)
+        hasUnsavedChanges = false
+        pendingPreset = nil
     }
-    
+
     func saveCurrentPreset() {
         guard let preset = selectedPreset else { return }
         guard isValidPresetName(preset.name) else {
             showInvalidNameAlert = true
             return
         }
-        let updatedPreset = JSPreset(id: preset.id, name: preset.name, code: jsCode, description: description)
+        let updatedPreset = JSPreset(
+            id: preset.id, name: preset.name, code: jsCode, description: description)
         do {
             if !fileManager.fileExists(atPath: presetsDirectory.path) {
-                try fileManager.createDirectory(at: presetsDirectory, withIntermediateDirectories: true)
+                try fileManager.createDirectory(
+                    at: presetsDirectory, withIntermediateDirectories: true)
             }
-            let fileURL = presetsDirectory.appendingPathComponent(createPresetFileName(preset: preset))
+            let fileURL = presetsDirectory.appendingPathComponent(
+                createPresetFileName(preset: preset))
             let data = try JSONEncoder().encode(updatedPreset)
             try data.write(to: fileURL)
             logStream.append("Saved preset '\(preset.name)' to disk.")
+            hasUnsavedChanges = false
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
             }
@@ -117,9 +145,45 @@ class JSFunctionsAdminViewModel {
             logStream.append("Failed to save preset: \(error.localizedDescription)")
         }
     }
-    
+
+    func discardChanges() {
+        if let preset = pendingPreset {
+            selectedPreset = preset
+            let fileURL = presetsDirectory.appendingPathComponent(
+                createPresetFileName(preset: preset))
+            if let data = try? Data(contentsOf: fileURL),
+                let loaded = try? JSONDecoder().decode(JSPreset.self, from: data)
+            {
+                jsCode = loaded.code
+                description = loaded.description
+            } else {
+                jsCode = ""
+                description = ""
+            }
+            hasUnsavedChanges = false
+            pendingPreset = nil
+        }
+    }
+
+    func saveChanges() {
+        saveCurrentPreset()
+        if let preset = pendingPreset {
+            selectPreset(preset)
+        }
+    }
+
+    // Add observers for jsCode and description changes
+    func changeDetection() {
+        let codeHash = HashUtils.sha256(jsCode)
+        if codeHash != initialCodeHash {
+            hasUnsavedChanges = true
+        }
+    }
+
     func renamePreset(_ newName: String) {
-        guard let oldPreset = selectedPreset, !newName.isEmpty, oldPreset.name != newName else { return }
+        guard let oldPreset = selectedPreset, !newName.isEmpty, oldPreset.name != newName else {
+            return
+        }
         guard isValidPresetName(newName) else {
             showInvalidNameAlert = true
             return
@@ -133,13 +197,16 @@ class JSFunctionsAdminViewModel {
                 return
             }
             try fileManager.moveItem(at: oldURL, to: newURL)
-            let renamedPreset = JSPreset(id: oldPreset.id, name: newName, code: jsCode, description: description)
+            let renamedPreset = JSPreset(
+                id: oldPreset.id, name: newName, code: jsCode, description: description)
             let data = try JSONEncoder().encode(renamedPreset)
             try data.write(to: newURL)
             logStream.append("Renamed preset '\(oldPreset.name)' to '\(newName)'.")
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
-                if let self = self, let updated = self.presets.first(where: { $0.id == oldPreset.id }) {
+                if let self = self,
+                    let updated = self.presets.first(where: { $0.id == oldPreset.id })
+                {
                     self.selectPreset(updated)
                 }
             }
@@ -147,7 +214,7 @@ class JSFunctionsAdminViewModel {
             logStream.append("Failed to rename preset: \(error.localizedDescription)")
         }
     }
-    
+
     func deletePreset(_ preset: JSPreset) {
         let fileURL = presetsDirectory.appendingPathComponent(createPresetFileName(preset: preset))
         do {
@@ -170,7 +237,7 @@ class JSFunctionsAdminViewModel {
             logStream.append("Failed to delete preset: \(error.localizedDescription)")
         }
     }
-    
+
     func resetContext() -> Bool {
         // TODO: use a better log stream
         let logStreamFn: LogStream = { message in
@@ -219,24 +286,26 @@ class JSFunctionsAdminViewModel {
             logStream.append("Notify executed.")
         }
     }
-    
+
     func isValidPresetName(_ name: String) -> Bool {
         let allowed = CharacterSet.letters.union(CharacterSet(charactersIn: "-_"))
         return !name.isEmpty && name.rangeOfCharacter(from: allowed.inverted) == nil
     }
-    
-    func createPresetFileName(preset: JSPreset) -> String{
+
+    func createPresetFileName(preset: JSPreset) -> String {
         return "\(preset.id)_\(preset.name).json"
     }
-    
+
     func createNewPreset(_ name: String) {
         let preset = JSPreset(name: name)
         presets.append(preset)
         do {
             if !fileManager.fileExists(atPath: presetsDirectory.path) {
-                try fileManager.createDirectory(at: presetsDirectory, withIntermediateDirectories: true)
+                try fileManager.createDirectory(
+                    at: presetsDirectory, withIntermediateDirectories: true)
             }
-            let fileURL = presetsDirectory.appendingPathComponent(createPresetFileName(preset: preset))
+            let fileURL = presetsDirectory.appendingPathComponent(
+                createPresetFileName(preset: preset))
             let data = try JSONEncoder().encode(preset)
             try data.write(to: fileURL)
             logStream.append("Created new preset '\(name)'.")
@@ -252,28 +321,31 @@ class JSFunctionsAdminViewModel {
     }
 
     func loadExample() {
-        jsCode = """
-        /**
-        * @param {number} appStartTime - The time (in ms since epoch) when the app started
-        * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
-        * @returns {string|number|object} The value to return to the client
-        */
-        function read(appStartTime, subscriptionTime) {
-            // Return a string, number, or object
-            return 'Read value: ' + new Date().toISOString();
-        }
+        self.jsCode = """
+            /**
+            * @param {number} appStartTime - The time (in ms since epoch) when the app started
+            * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
+            * @returns {string|number|object} The value to return to the client
+            */
+            function read(appStartTime, subscriptionTime) {
+                // Return a string, number, or object
+                return 'Read value: ' + new Date().toISOString();
+            }
 
-        /**
-        * @param {number} appStartTime - The time (in ms since epoch) when the app started
-        * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
-        * @param {string} value - The value written by the client
-        * @returns {string|number|object|boolean} The result of the write operation
-        */
-        function write(appStartTime, subscriptionTime, value) {
-            // Log the value and return a result
-            console.log('Write value:', value);
-            return true;
-        }
-        """
+            /**
+            * @param {number} appStartTime - The time (in ms since epoch) when the app started
+            * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
+            * @param {string} value - The value written by the client
+            * @returns {string|number|object|boolean} The result of the write operation
+            */
+            function write(appStartTime, subscriptionTime, value) {
+                // Log the value and return a result
+                console.log('Write value:', value);
+                return true;
+            }
+            """
+
+        // reload the context
+        self.resetContext()
     }
 }

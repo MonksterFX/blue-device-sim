@@ -40,9 +40,6 @@ struct SettingsView: View {
                 }
             )
         }
-        .sheet(isPresented: $isShowingJSExamplesSheet) {
-            JavaScriptExamplesView(deviceSettings: deviceSettings)
-        }
     }
 }
 

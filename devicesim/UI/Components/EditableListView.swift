@@ -7,10 +7,10 @@ struct EditableListView<Item: Identifiable & Hashable>: View {
     @State private var newItemName: String = ""
     @State private var showNewItemAlert: Bool = false
     @State private var itemToDelete: Item? = nil
-    @State private var selectedItem: Item? = nil
     
     // from parent
-    var items: [Item]
+    let items: [Item]
+    let selectedItem: Item? 
     
     let getName: (Item) -> String
     let onAdd: (String) -> Void
@@ -33,7 +33,7 @@ struct EditableListView<Item: Identifiable & Hashable>: View {
                 .buttonStyle(.bordered)
             }
             
-            List(selection: $selectedItem) {
+            List() {
                 ForEach(items) { item in
                     HStack{
                         Text(getName(item))
@@ -58,7 +58,6 @@ struct EditableListView<Item: Identifiable & Hashable>: View {
                     .background(selectedItem?.id == item.id ? Color.indigo : Color.red)
                     .cornerRadius(5)
                     .onTapGesture {
-                        selectedItem = item
                         onSelect(item)
                     }
                 }
@@ -131,6 +130,7 @@ struct EditableListView_Previews: PreviewProvider {
         var body: some View {
             EditableListView<DemoItem>(
                 items: demoItems,
+                selectedItem: demoItems[0],
                 getName: { $0.name },
                 onAdd: { name in demoItems.append(DemoItem(name: name)) },
                 onDelete: { item in demoItems.removeAll { $0.id == item.id } },

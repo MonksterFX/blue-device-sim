@@ -12,9 +12,15 @@ struct JSFunctionEditorView: View {
 
             Text("Description")
             InputField(value: $viewModel.description)
+                .onChange(of: viewModel.description) { _, _ in
+                    viewModel.changeDetection()
+                }
 
             Text("Editor")
             CodeEditor(code: $viewModel.jsCode)
+                .onChange(of: viewModel.jsCode) { _, _ in
+                    viewModel.changeDetection()
+                }
 
             HStack {
                 Button("Save Preset") {

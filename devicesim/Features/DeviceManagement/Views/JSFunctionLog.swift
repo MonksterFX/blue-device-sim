@@ -20,10 +20,10 @@ struct JSFunctionLog: View{
                         Text(entry.element)
                             .font(.caption)
                             .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                }
-            }
-            .frame(height: 120)
+                }.frame(maxWidth: .infinity)
+            }.frame(maxWidth: .infinity)
             .background(Color.gray.opacity(0.05))
             .cornerRadius(6)
         }

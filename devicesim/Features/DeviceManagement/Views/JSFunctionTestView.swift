@@ -24,7 +24,9 @@ struct JSFunctionTestView: View {
             }
 
             if viewModel.operation == .notify {
-
+                Text("Currently not supported")
+                    .font(.subheadline)
+                    .foregroundColor(.red)
             }
 
             HStack {
@@ -34,7 +36,7 @@ struct JSFunctionTestView: View {
                 .buttonStyle(.borderedProminent)
 
                 Spacer()
-                
+
                 Button("Reset Context") {
                     viewModel.resetContext()
                 }

@@ -44,6 +44,19 @@ struct JSFunctionsAdminView: View {
             }, message: {
                 Text("Enter a name for the new preset.")
             })
+            .alert("Unsaved Changes", isPresented: $viewModel.showUnsavedChangesAlert, actions: {
+                Button("Save Changes") {
+                    viewModel.saveChanges()
+                }
+                Button("Discard Changes", role: .destructive) {
+                    viewModel.discardChanges()
+                }
+                Button("Cancel", role: .cancel) {
+                    viewModel.pendingPreset = nil
+                }
+            }, message: {
+                Text("You have unsaved changes. Would you like to save them before switching presets?")
+            })
             JSFunctionLog(viewModel: viewModel)
         }.enableInjection()
     }
