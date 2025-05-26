@@ -10,12 +10,9 @@ struct JSCodeEditor: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TextEditor(text: $code)
-                .font(.system(.body, design: .monospaced))
+            CustomTextEditor(text: $code)
                 .frame(height: height)
                 .border(Color.gray.opacity(0.3))
-                .autocorrectionDisabled(true)
-                .textSelection(.enabled)
             Rectangle()
                 .frame(height: 12)
                 .foregroundColor(.clear)
