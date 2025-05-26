@@ -1,6 +1,8 @@
 import Foundation
 import JavaScriptCore
 
+typealias LogStream = (String) -> Void
+
 struct JavaScriptEngine {
     // single instance of the JavaScript engine, context is keeped alive
     private let context: JSContext
@@ -8,14 +10,17 @@ struct JavaScriptEngine {
     private(set) var canRead: Bool = false
     private(set) var canWrite: Bool = false
 
-    init?(jsFunctionsCode: String) {
-        context = JSContext()!
+    init?(jsFunctionsCode: String, logStream: LogStream? = nil) {
+        self.context = JSContext()!
         
-        // inject console.log
         let consoleLog: @convention(block) (String) -> Void = { message in
-            print(message)
+            logStream?(message) 
         }
-        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString)
+
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString) 
+
+        // create a console object with a log method that logs to the log stream and accepts multiple arguments
+        context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
         
         // add error handler
         context.exceptionHandler = { _, exception in

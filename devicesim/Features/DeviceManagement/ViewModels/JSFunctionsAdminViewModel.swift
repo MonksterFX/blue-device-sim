@@ -37,6 +37,7 @@ class JSFunctionsAdminViewModel {
     var showInvalidNameAlert: Bool = false
     var showNewPresetAlert: Bool = false
     var newPresetName: String = ""
+    var context: JavaScriptEngine? = nil
     
     private let fileManager = FileManager.default
     private var presetsDirectory: URL {
@@ -170,29 +171,46 @@ class JSFunctionsAdminViewModel {
         }
     }
     
-    func runTest() {
-        logStream.append("Running \(operation.rawValue) test...")
+    func resetContext() -> Bool {
+        // TODO: use a better log stream
+        let logStreamFn: LogStream = { message in
+            self.logStream.append(message)
+        }
 
-        guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode) else {
+        guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode, logStream: logStreamFn) else {
             logStream.append("Failed to create JavaScript engine")
-            return
+            return false
+        }
+        self.context = engine
+        logStream.append("Reset context")
+        return true
+    }
+
+    func runTest() {
+        // ensure the context is initialized
+        if context == nil {
+            if !resetContext() {
+                logStream.append("Failed to reset context")
+                return
+            }
+            // TODO show banner with error message
         }
 
         switch operation {
         case .read:
-            guard engine.canRead else {
+            guard context!.canRead else {
                 logStream.append("Read function not defined")
                 return
             }
-            lastResult = engine.runRead()
+            lastResult = context!.runRead()
             logStream.append("Read executed -> \(lastResult)")
-            
+
         case .write:
-            guard engine.canWrite else {
+            guard context!.canWrite else {
                 logStream.append("Write function not defined")
                 return
             }
-            lastResult = engine.runWrite(value: testInput)
+            lastResult = context!.runWrite(value: testInput)
             logStream.append("Write executed with input: \(testInput) -> \(lastResult)")
 
         case .notify:

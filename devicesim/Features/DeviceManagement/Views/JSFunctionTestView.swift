@@ -9,7 +9,7 @@ struct JSFunctionTestView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Test JS Function")
                 .font(.headline)
-                
+
             Picker("Operation", selection: $viewModel.operation) {
                 ForEach(JSFunctionsAdminViewModel.OperationType.allCases) { op in
                     Text(op.rawValue).tag(op)
@@ -24,13 +24,22 @@ struct JSFunctionTestView: View {
             }
 
             if viewModel.operation == .notify {
-                
+
             }
 
-            Button("Run Test") {
-                viewModel.runTest()
+            HStack {
+                Button("Run Test") {
+                    viewModel.runTest()
+                }
+                .buttonStyle(.borderedProminent)
+
+                Spacer()
+                
+                Button("Reset Context") {
+                    viewModel.resetContext()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Last Result")
