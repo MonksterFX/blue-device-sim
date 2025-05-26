@@ -1,8 +1,9 @@
 import SwiftUI
+import Inject
 
 // MARK: - Main View
 struct JSFunctionsAdminView: View {
-
+    @ObserveInjection var inject
     // main state
     @State private var viewModel = JSFunctionsAdminViewModel()
     
@@ -40,7 +41,7 @@ struct JSFunctionsAdminView: View {
                 Text("Enter a name for the new preset.")
             })
             JSFunctionLog(viewModel: viewModel)
-        }
+        }.enableInjection()
     }
 
 }
