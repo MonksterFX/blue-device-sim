@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PresetsListView: View {
+struct JSFunctionsPresetsListView: View {
     @Bindable var viewModel: JSFunctionsAdminViewModel
     
     var body: some View {

@@ -172,15 +172,32 @@ class JSFunctionsAdminViewModel {
     
     func runTest() {
         logStream.append("Running \(operation.rawValue) test...")
+
+        guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode) else {
+            logStream.append("Failed to create JavaScript engine")
+            return
+        }
+
         switch operation {
         case .read:
-            lastResult = "Read result: \(Date())"
-            logStream.append("Read executed.")
+            guard engine.canRead else {
+                logStream.append("Read function not defined")
+                return
+            }
+            lastResult = engine.runRead()
+            logStream.append("Read executed -> \(lastResult)")
+            
         case .write:
-            lastResult = "Write result: \(testInput)"
-            logStream.append("Write executed with input: \(testInput)")
+            guard engine.canWrite else {
+                logStream.append("Write function not defined")
+                return
+            }
+            lastResult = engine.runWrite(value: testInput)
+            logStream.append("Write executed with input: \(testInput) -> \(lastResult)")
+
         case .notify:
-            lastResult = "Notify result: \(Date())"
+            // not implemented yet
+            lastResult = "Notify not implemented yet"
             logStream.append("Notify executed.")
         }
     }

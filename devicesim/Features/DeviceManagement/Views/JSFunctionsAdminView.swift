@@ -10,20 +10,24 @@ struct JSFunctionsAdminView: View {
     var body: some View {      
         VStack{
             HStack(spacing: 0) {
-                PresetsListView(viewModel: viewModel)
+
+                JSFunctionsPresetsListView(viewModel: viewModel)
                     .frame(width: 200)
                     .padding()
                     .background(Color(.windowBackgroundColor))
                     .border(Color.gray.opacity(0.2), width: 1)
+
                 JSFunctionEditorView(viewModel: viewModel)
                     .frame(minWidth: 350, maxWidth: .infinity)
                     .padding()
                     .background(Color(.controlBackgroundColor))
                     .border(Color.gray.opacity(0.2), width: 1)
+
                 JSFunctionTestView(viewModel: viewModel)
                     .frame(width: 320)
                     .padding()
                     .background(Color(.windowBackgroundColor))
+                    
             }
             .frame(minHeight: 400)
             .alert("Invalid Preset Name", isPresented: $viewModel.showInvalidNameAlert, actions: {

@@ -23,19 +23,24 @@ struct JSFunctionTestView: View {
                     .textFieldStyle(.roundedBorder)
             }
 
+            if viewModel.operation == .notify {
+                
+            }
+
             Button("Run Test") {
                 viewModel.runTest()
             }
             .buttonStyle(.borderedProminent)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Last Result:")
+                Text("Last Result")
                     .font(.subheadline)
                 Text(viewModel.lastResult)
                     .font(.body)
                     .padding(6)
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 4)
             Spacer()
