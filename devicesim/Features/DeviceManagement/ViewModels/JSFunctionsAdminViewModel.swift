@@ -215,4 +215,30 @@ class JSFunctionsAdminViewModel {
             logStream.append("Failed to create preset: \(error.localizedDescription)")
         }
     }
+
+    func loadExample() {
+        jsCode = """
+        /**
+        * @param {number} appStartTime - The time (in ms since epoch) when the app started
+        * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
+        * @returns {string|number|object} The value to return to the client
+        */
+        function read(appStartTime, subscriptionTime) {
+            // Return a string, number, or object
+            return 'Read value: ' + new Date().toISOString();
+        }
+
+        /**
+        * @param {number} appStartTime - The time (in ms since epoch) when the app started
+        * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
+        * @param {string} value - The value written by the client
+        * @returns {string|number|object|boolean} The result of the write operation
+        */
+        function write(appStartTime, subscriptionTime, value) {
+            // Log the value and return a result
+            console.log('Write value:', value);
+            return true;
+        }
+        """
+    }
 }

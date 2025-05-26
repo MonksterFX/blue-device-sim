@@ -1,28 +1,33 @@
+import Inject
 import SwiftUI
 
 struct JSFunctionTestView: View {
+    @ObserveInjection var inject
     @Bindable var viewModel: JSFunctionsAdminViewModel
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Test JS Function")
                 .font(.headline)
+                
             Picker("Operation", selection: $viewModel.operation) {
                 ForEach(JSFunctionsAdminViewModel.OperationType.allCases) { op in
                     Text(op.rawValue).tag(op)
                 }
             }
             .pickerStyle(.segmented)
-            
+            .tint(.accentColor)
+
             if viewModel.operation == .write {
                 TextField("Input value", text: $viewModel.testInput)
                     .textFieldStyle(.roundedBorder)
             }
+
             Button("Run Test") {
                 viewModel.runTest()
             }
             .buttonStyle(.borderedProminent)
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("Last Result:")
                     .font(.subheadline)
@@ -34,6 +39,6 @@ struct JSFunctionTestView: View {
             }
             .padding(.vertical, 4)
             Spacer()
-        }
+        }.enableInjection()
     }
-} 
+}

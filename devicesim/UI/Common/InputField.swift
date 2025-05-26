@@ -1,0 +1,18 @@
+import SwiftUI
+import Inject
+
+struct InputField: View {
+    @Binding var value: String
+    @ObserveInjection var inject
+    var body: some View {
+        TextField("Enter text", text: $value)
+            .textFieldStyle(.plain)
+            .padding(10)
+            .cornerRadius(5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            )
+            .enableInjection()
+    }
+}
