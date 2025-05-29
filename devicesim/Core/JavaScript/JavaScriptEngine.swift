@@ -30,6 +30,20 @@ struct JavaScriptEngine {
         // create a console object with a log method that logs to the log stream and accepts multiple arguments
         context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
         
+        // add polyfill to the context
+        let polyfillURL = Bundle.main.url(forResource: "textencoder", withExtension: "js")
+        guard let polyfillURL = polyfillURL else {
+            print("Error: Could not find tx-typed.min.js script")
+            return nil
+        }
+        do {
+            let script = try String(contentsOf: polyfillURL, encoding: .utf8)
+            context.evaluateScript(script)
+        } catch {
+            print("Error loading script: \(error)")
+            return nil
+        }
+        
         // add library to the context
         let fileURL = Bundle.main.url(forResource: "tx-typed.min", withExtension: "js")
         guard let scriptUrl = fileURL else {
@@ -67,8 +81,8 @@ struct JavaScriptEngine {
         }
         
         // print globals
-        let global = context.globalObject
-        print(global?.toDictionary() ?? [:])
+        // let global = context.globalObject
+        // print(global?.toDictionary() ?? [:])
     }
     
     // TODO: decide which datatypes to support
@@ -107,12 +121,18 @@ struct JavaScriptEngine {
     }
 
     func runRead(appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (Data) {
-        guard let result: JSValue = (self.context.evaluateScript("read(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000))")) else { return "test" }
-        return (parseReturnValue(result: result))
+        guard let result: JSValue = (self.context.evaluateScript("read(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000))")) else { 
+            // TODO: proper error handling
+            return Data()
+        }
+        return jsArrayBufferToData(result) ?? Data()
     }
 
     func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: Data) -> (Data) {
-        guard let result: JSValue = (self.context.evaluateScript("write(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000), '\(value)')")) else { return "test" }
-        return (parseReturnValue(result: result))
+        guard let result: JSValue = (self.context.evaluateScript("write(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000), '\(value)')")) else { 
+            // TODO: proper error handling
+            return Data()
+        }
+        return jsArrayBufferToData(result) ?? Data()
     }
 } 

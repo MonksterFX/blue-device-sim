@@ -7,18 +7,61 @@ import CryptoKit
 //
 import Foundation
 
-struct JSPreset: Codable, Identifiable, Hashable {
-    let id: UUID
-    let name: String
-    let code: String
-    let description: String
+enum ConvertionTypes {
+    case string
+    case number
+    case buffer
+}
 
-    init(id: UUID = UUID(), name: String, code: String = "", description: String = "") {
-        self.id = id
-        self.name = name
-        self.description = description
-        self.code = code
+func convertToString(data: Data, to type: ConvertionTypes) -> String {
+    switch type {
+    case .string:
+        return String(data: data, encoding: .utf8)!
+    case .number:
+        return String(
+            data.withUnsafeBytes {
+                $0.load(as: Double.self)
+            })
+    case .buffer:
+            return data.map { String(format: "%02X", $0) }.joined(separator: " ")
     }
+}
+
+func convertFromString(value: String, to type: ConvertionTypes) -> Data {
+    switch type {
+    case .string:
+        return value.data(using: .utf8)!
+    case .number:
+        var double = Double(value)
+        return withUnsafeBytes(of: &double) { Data($0) } ?? Data()
+    case .buffer:
+        return dataFromHexString(value) ?? Data()
+    }
+}
+
+func dataFromHexString(_ hex: String) -> Data? {
+    var data = Data()
+    var hex = hex
+
+    // Remove any whitespace or prefix (e.g. "0x")
+    hex = hex.replacingOccurrences(of: " ", with: "")
+    hex = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+
+    guard hex.count % 2 == 0 else { return nil } // Must be even-length
+
+    var index = hex.startIndex
+    while index < hex.endIndex {
+        let nextIndex = hex.index(index, offsetBy: 2)
+        let byteString = hex[index..<nextIndex]
+        if let byte = UInt8(byteString, radix: 16) {
+            data.append(byte)
+        } else {
+            return nil // Invalid hex digit
+        }
+        index = nextIndex
+    }
+
+    return data
 }
 
 @Observable
@@ -41,6 +84,8 @@ class JSFunctionsAdminViewModel {
 
     // js engine context
     var context: JavaScriptEngine? = nil
+    var inputType: ConvertionTypes = .string
+    var resultType: ConvertionTypes = .string
 
     // change detection
     var initialCodeHash: String = ""
@@ -269,7 +314,9 @@ class JSFunctionsAdminViewModel {
                 logStream.append("Read function not defined")
                 return
             }
-            lastResult = context!.runRead()
+            let result = context!.runRead()
+            logStream.append("Read executed -> \(result)")
+            lastResult = convertToString(data: result, to: self.resultType)
             logStream.append("Read executed -> \(lastResult)")
 
         case .write:
@@ -277,7 +324,9 @@ class JSFunctionsAdminViewModel {
                 logStream.append("Write function not defined")
                 return
             }
-            lastResult = context!.runWrite(value: testInput)
+            let convertedInput = convertFromString(value: testInput, to: inputType)
+            let result = context!.runWrite(value: convertedInput)
+            lastResult = convertToString(data: result, to: self.resultType)
             logStream.append("Write executed with input: \(testInput) -> \(lastResult)")
 
         case .notify:

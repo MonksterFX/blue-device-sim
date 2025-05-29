@@ -252,9 +252,9 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         addLog("Received read request for characteristic \(request.characteristic.uuid.uuidString)")
         
-        let value: String = EngineManager.route(characteristic: request.characteristic.uuid, action: .read, data: nil)
-        
-        request.value = value.data(using: .utf8)!
+        let value = EngineManager.route(characteristic: request.characteristic.uuid, action: .read, data: nil)
+    
+        request.value = value ?? Data()
         peripheral.respond(to: request, withResult: .success)
     }
     
@@ -263,7 +263,6 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         addLog("Received write request for characteristic \(requests.first?.characteristic.uuid.uuidString ?? "Unknown")")
         
         EngineManager.route(characteristic: requests.first!.characteristic.uuid, action: requests.first!.characteristic.properties, data: requests.first!.value!)
-
 
         peripheral.respond(to: requests.first!, withResult: .success)
 

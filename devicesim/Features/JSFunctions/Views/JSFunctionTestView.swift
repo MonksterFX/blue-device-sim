@@ -1,6 +1,18 @@
 import Inject
 import SwiftUI
 
+struct ConvertionTypePicker: View {
+    @Binding var selectedType: ConvertionTypes
+
+    var body: some View {
+        Picker("Convertion Type", selection: $selectedType) {
+            Text("String").tag(ConvertionTypes.string)
+            Text("Number").tag(ConvertionTypes.number)
+            Text("Buffer").tag(ConvertionTypes.buffer)
+        }
+    }
+}
+
 struct JSFunctionTestView: View {
     @ObserveInjection var inject
     @Bindable var viewModel: JSFunctionsAdminViewModel
@@ -42,6 +54,19 @@ struct JSFunctionTestView: View {
                 }
                 .buttonStyle(.bordered)
             }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Input Type")
+                    .font(.subheadline)
+                ConvertionTypePicker(selectedType: $viewModel.inputType)
+
+                Text("Result Type")
+                    .font(.subheadline)
+                ConvertionTypePicker(selectedType: $viewModel.resultType)
+            }
+            .pickerStyle(.segmented)
+            .tint(.accentColor)
+            .padding(.vertical, 4)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Last Result")

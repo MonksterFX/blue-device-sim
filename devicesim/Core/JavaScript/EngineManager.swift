@@ -16,9 +16,10 @@ final class EngineManager {
         let fileManager = FileManager.default
         var documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         documentsPath = documentsPath.appendingPathComponent("JSFunctionPresets", isDirectory: true)
-        
+
         // find preset file which starts with the preset uuid
-        let presetFiles = try? fileManager.contentsOfDirectory(at: documentsPath, includingPropertiesForKeys: nil)
+        let presetFiles = try? fileManager.contentsOfDirectory(
+            at: documentsPath, includingPropertiesForKeys: nil)
         let presetFile = presetFiles?.first { $0.lastPathComponent.starts(with: preset.uuidString) }
 
         guard let url = presetFile else { return "" }
@@ -45,7 +46,7 @@ final class EngineManager {
         }
     }
 
-        // Question: does this cause a memory leak?
+    // Question: does this cause a memory leak?
     // destroy all engines in the stack
     static func destroyStack() {
         stack.removeAll()
@@ -77,14 +78,19 @@ final class EngineManager {
         }
     }
 
-    static func route(characteristic: CBUUID, action: CBCharacteristicProperties, data: Data?) -> String
+    static func route(characteristic: CBUUID, action: CBCharacteristicProperties, data: Data?)
+        -> Data?
     {
         if let engine = stack[characteristic] {
             switch action {
             case .read:
                 return engine.runRead()
             case .write:
-                 return engine.runWrite(value: data)
+                if let data = data {
+                    return engine.runWrite(value: data) 
+                } else {
+                    addLog("write without data is currently not supported")
+                }
             case .writeWithoutResponse:
                 addLog("write without response is currently not supported")
             case .notify:
@@ -98,6 +104,6 @@ final class EngineManager {
             // TODO: proper error handling
             addLog("No engine found for characteristic \(characteristic)")
         }
-        return "No Execution" 
+        return "No Execution".data(using: .utf8)
     }
 }
