@@ -1,6 +1,15 @@
 import Inject
 import SwiftUI
 
+// TODO: HACK to work-around the smart quote issue
+extension NSTextView {
+    open override var frame: CGRect {
+        didSet {
+            self.isAutomaticQuoteSubstitutionEnabled = false
+        }
+    }
+}
+
 struct CodeEditor: View {
     @Binding var code: String
     @ObserveInjection var inject
@@ -8,6 +17,7 @@ struct CodeEditor: View {
     var body: some View {
         VStack {
             TextEditor(text: $code)
+
                 .frame(minHeight: 100)
                 .padding(10)
                 .background(Color(.textBackgroundColor))

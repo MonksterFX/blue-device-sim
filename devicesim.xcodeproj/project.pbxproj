@@ -32,17 +32,15 @@
 		DD4C02292DBCC6FF00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02652DBCC94D00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD8678DE2DE78ADB00BD2ADA /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
-		DDB903A52DB3D59F00BF2263 /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = devicesim.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD91AE012DE886E400C8A1DC /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
+		DDB903A52DB3D59F00BF2263 /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = devicesim.app; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesim.app"; sourceTree = "<absolute>"; };
+		DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = devicesimTests.xctest; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesim.app/Contents/PlugIns/devicesimTests.xctest"; sourceTree = "<absolute>"; };
+		DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = devicesimUITests.xctest; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesimUITests-Runner.app/Contents/PlugIns/devicesimUITests.xctest"; sourceTree = "<absolute>"; };
+		DDC3C2272DE8B1EE00103AB5 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
+		DDE820E22DE8B18500E0F93A /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DDB903A72DB3D59F00BF2263 /* devicesim */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = devicesim;
-			sourceTree = "<group>";
-		};
 		DDB903B92DB3D5A300BF2263 /* devicesimTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = devicesimTests;
@@ -51,6 +49,11 @@
 		DDB903C32DB3D5A300BF2263 /* devicesimUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = devicesimUITests;
+			sourceTree = "<group>";
+		};
+		DDC3C22A2DE8B1EE00103AB5 /* devicesim */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = devicesim;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -109,22 +112,32 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		DD91AE042DE886E400C8A1DC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		DDB9039C2DB3D59F00BF2263 = {
 			isa = PBXGroup;
 			children = (
-				DDB903A72DB3D59F00BF2263 /* devicesim */,
 				DDB903B92DB3D5A300BF2263 /* devicesimTests */,
 				DDB903C32DB3D5A300BF2263 /* devicesimUITests */,
-				DDB903A62DB3D59F00BF2263 /* Products */,
+				DDC3C22A2DE8B1EE00103AB5 /* devicesim */,
 			);
 			sourceTree = "<group>";
 		};
-		DDB903A62DB3D59F00BF2263 /* Products */ = {
+		DDC3C22B2DE8B1EE00103AB5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DDB903A52DB3D59F00BF2263 /* devicesim.app */,
-				DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */,
-				DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DDE821132DE8B18600E0F93A /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,7 +158,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				DDB903A72DB3D59F00BF2263 /* devicesim */,
+				DDC3C22A2DE8B1EE00103AB5 /* devicesim */,
 			);
 			name = devicesim;
 			packageProductDependencies = (
@@ -237,9 +250,13 @@
 				DD293CDF2DE4E58000E16D14 /* XCRemoteSwiftPackageReference "Inject" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = DDB903A62DB3D59F00BF2263 /* Products */;
+			productRefGroup = DDB9039C2DB3D59F00BF2263;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = DDC3C22B2DE8B1EE00103AB5 /* Products */;
+					ProjectRef = DDC3C2272DE8B1EE00103AB5 /* devicesim.xcodeproj */;
+				},
 				{
 					ProductGroup = DD293CAE2DE4E4C500E16D14 /* Products */;
 					ProjectRef = DD293CAB2DE4E4C500E16D14 /* devicesim.xcodeproj */;
@@ -251,6 +268,14 @@
 				{
 					ProductGroup = DD8678E12DE78ADB00BD2ADA /* Products */;
 					ProjectRef = DD8678DE2DE78ADB00BD2ADA /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DD91AE042DE886E400C8A1DC /* Products */;
+					ProjectRef = DD91AE012DE886E400C8A1DC /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DDE821132DE8B18600E0F93A /* Products */;
+					ProjectRef = DDE820E22DE8B18500E0F93A /* devicesim.xcodeproj */;
 				},
 				{
 					ProductGroup = DD4C022A2DBCC6FF00F7B554 /* Products */;

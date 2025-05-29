@@ -13,20 +13,35 @@ struct JavaScriptEngine {
     init?(jsFunctionsCode: String, logStream: LogStream? = nil) {
         self.context = JSContext()!
         
-        let consoleLog: @convention(block) (String) -> Void = { message in
-            logStream?(message) 
-        }
-
-        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString) 
-
-        // create a console object with a log method that logs to the log stream and accepts multiple arguments
-        context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
-        
         // add error handler
         context.exceptionHandler = { _, exception in
             if let exc = exception {
                 print("JS Error: \(exc.toString() ?? "Unknown error")")
             }
+        }
+        
+        let consoleLog: @convention(block) (String) -> Void = { message in
+            logStream?(message) 
+        }
+
+        // add consoleLog to the context
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString) 
+
+        // create a console object with a log method that logs to the log stream and accepts multiple arguments
+        context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
+        
+        // add library to the context
+        let fileURL = Bundle.main.url(forResource: "tx-typed.min", withExtension: "js")
+        guard let scriptUrl = fileURL else {
+            print("Error: Could not find tx-typed.min.js script")
+            return nil
+        }
+        do {
+            let script = try String(contentsOf: scriptUrl, encoding: .utf8)
+            context.evaluateScript(script)
+        } catch {
+            print("Error loading script: \(error)")
+            return nil
         }
 
         // load the JavaScript code
@@ -50,6 +65,10 @@ struct JavaScriptEngine {
         } else {
             canWrite = true
         }
+        
+        // print globals
+        let global = context.globalObject
+        print(global?.toDictionary() ?? [:])
     }
     
     // TODO: decide which datatypes to support
