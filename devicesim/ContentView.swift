@@ -11,11 +11,11 @@ import CoreBluetooth
 import Combine
 
 struct ContentView: View {
-    // @StateObject private var bluetoothManager = BluetoothManager()
-    // @StateObject private var deviceSettings = DeviceSettings()
-    // @StateObject private var viewModel = ContentViewModel()
+    @StateObject private var bluetoothManager = BluetoothManager()
+    @StateObject private var deviceSettings = DeviceSettings()
+    @StateObject private var viewModel = ContentViewModel()
     @State private var selectedTab = 0
-    
+
     var body: some View {
         VStack {
             // HStack {
@@ -33,14 +33,14 @@ struct ContentView: View {
             //     .help("Open the storage folders for presets and profiles in Finder")
             // }
             TabView(selection: $selectedTab) {
-                // MainView(
-                //     bluetoothManager: bluetoothManager,
-                //     deviceSettings: deviceSettings
-                // )
-                // .tabItem {
-                //     Label("Main", systemImage: "antenna.radiowaves.left.and.right")
-                // }
-                // .tag(0)
+                MainView(
+                    bluetoothManager: bluetoothManager,
+                    deviceSettings: deviceSettings
+                )
+                .tabItem {
+                    Label("Main", systemImage: "antenna.radiowaves.left.and.right")
+                }
+                .tag(0)
 
                 ProfileView()
                     .tabItem {
@@ -52,13 +52,13 @@ struct ContentView: View {
                 //     .tabItem {
                 //         Label("Settings", systemImage: "gear")
                 //     }
-                //     .tag(1)
-                
-                // LogView(bluetoothManager: bluetoothManager)
-                //     .tabItem {
-                //         Label("Logs", systemImage: "text.book.closed")
-                //     }
                 //     .tag(2)
+                
+                LogView(bluetoothManager: bluetoothManager)
+                    .tabItem {
+                        Label("Logs", systemImage: "text.book.closed")
+                    }
+                    .tag(2)
 
                 JSFunctionsAdminView()
                     .tabItem {

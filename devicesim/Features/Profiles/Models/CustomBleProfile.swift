@@ -92,23 +92,20 @@ struct CustomBleProfile: VersionedCodable, Hashable {
 struct CustomBleService: Codable {
     var uuid: CBUUID
     var name: String = ""
-    var isPrimary: Bool = true
     var characteristics: [CustomBleCharacteristic] = []
 
     init(
         uuid: CBUUID = CBUUID(),
         name: String = "",
-        isPrimary: Bool = true,
         characteristics: [CustomBleCharacteristic] = []
     ) {
         self.uuid = uuid
         self.name = name
-        self.isPrimary = isPrimary
         self.characteristics = characteristics
     }
 
     enum CodingKeys: String, CodingKey {
-        case uuid, name, isPrimary, characteristics
+        case uuid, name, characteristics
     }
 
     init(from decoder: Decoder) throws {
@@ -116,7 +113,6 @@ struct CustomBleService: Codable {
         let uuidWrapper = try container.decode(CBUUIDWrapper.self, forKey: .uuid)
         uuid = uuidWrapper.uuid
         name = try container.decode(String.self, forKey: .name)
-        isPrimary = try container.decode(Bool.self, forKey: .isPrimary)
         characteristics = try container.decode(
             [CustomBleCharacteristic].self, forKey: .characteristics)
     }
@@ -125,7 +121,6 @@ struct CustomBleService: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(CBUUIDWrapper(uuid), forKey: .uuid)
         try container.encode(name, forKey: .name)
-        try container.encode(isPrimary, forKey: .isPrimary)
         try container.encode(characteristics, forKey: .characteristics)
     }
 }

@@ -18,51 +18,43 @@ struct LogMessage: Identifiable, Hashable {
 }
 
 class BluetoothManager: NSObject, ObservableObject {
+    private var profilesViewModel: ProfilesViewModel = ProfilesViewModel()
+    
     // MARK: - Published Properties
     @Published var isAdvertising = false
     @Published var connectedCentrals: [CBCentral] = []
     @Published var logMessages: [LogMessage] = []
     @Published var bluetoothState: CBManagerState = .unknown
     @Published var stateMessage: String = "Initializing Bluetooth..."
-    
+
     // MARK: - Device Settings
-    var deviceSettings: DeviceSettings?
-    
+    @Published var profile: CustomBleProfile
+
     // MARK: - Characteristic Handler Manager
     private lazy var characteristicHandlerManager = CharacteristicHandlerManager(bluetoothManager: self)
     
     // MARK: - Peripheral Manager
     private var peripheralManager: CBPeripheralManager!
     private var isInitialized = false
-    
-    // MARK: - Service and Characteristic UUIDs
-    private var serviceUUID: CBUUID {
-        guard let settings = deviceSettings else {
-            return CBUUID(string: "5FFE0000-5000-4000-3000-200000000000")
-        }
-        return CBUUID(string: settings.serviceUUID)
-    }
-    
-    private var characteristicUUID: CBUUID {
-        guard let settings = deviceSettings else {
-            return CBUUID(string: "5FFE0001-5000-4000-3000-200000000000")
-        }
-        return CBUUID(string: settings.characteristicUUID)
-    }
-    
-    // MARK: - Properties
-    private var transferCharacteristic: CBMutableCharacteristic!
-    private var transferService: CBMutableService!
     private var dataToSend = Data()
     private var sendDataIndex: Int = 0
     
     override init() {
+
+        // TODO: save prefered profile in user defaults
+        profile = profilesViewModel.profiles.first ?? CustomBleProfile(name: "Mac OS Simulator", services: [])
+
         super.init()
+
+        // Question: this runs on main thread?
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+
     }
     
     // MARK: - Public Methods
     func startAdvertising() {
+        let advertisementData = CustomBleProfileConverter.convertToAdvertisementData(profile)
+
         guard peripheralManager.state == .poweredOn else {
             let errorMessage = "Cannot start advertising - Bluetooth is not powered on (Current state: \(stateDescription(for: peripheralManager.state)))"
             addLog(errorMessage)
@@ -78,22 +70,14 @@ class BluetoothManager: NSObject, ObservableObject {
         }
         
         if !peripheralManager.isAdvertising {
-            setupService()
-            
-            // Update the JS handler if enabled
-            updateJSHandler()
-            
-            // Get device name from settings or use default
-            let deviceName = deviceSettings?.deviceName ?? "MacOS Simulator"
+            setupServices()
             
             // Start advertising with a custom name
-            peripheralManager.startAdvertising([
-                CBAdvertisementDataServiceUUIDsKey: [serviceUUID],
-                CBAdvertisementDataLocalNameKey: deviceName
-            ])
+            peripheralManager.startAdvertising(advertisementData)
             
-            addLog("Started advertising as '\(deviceName)'")
             isAdvertising = true
+            
+            addLog("Started advertising as '\(profile.name)'")
         }
     }
     
@@ -104,7 +88,7 @@ class BluetoothManager: NSObject, ObservableObject {
         isAdvertising = false
     }
     
-    func sendData(_ data: Data) {
+    func sendData(_ data: Data, characteristic: CBMutableCharacteristic) {
         guard !connectedCentrals.isEmpty else {
             addLog("No devices connected")
             return
@@ -112,7 +96,7 @@ class BluetoothManager: NSObject, ObservableObject {
         
         let didSend = peripheralManager.updateValue(
             data,
-            for: transferCharacteristic,
+            for: characteristic,
             onSubscribedCentrals: nil
         )
         
@@ -137,44 +121,33 @@ class BluetoothManager: NSObject, ObservableObject {
     }
     
     // MARK: - Private Methods
-    private func setupService() {
-        // Create a characteristic
-        transferCharacteristic = CBMutableCharacteristic(
-            type: characteristicUUID,
-            properties: [.read, .write, .notify],
-            value: nil,
-            permissions: [.readable, .writeable]
-        )
-        
-        // Create a service
-        transferService = CBMutableService(
-            type: serviceUUID,
-            primary: true
-        )
-        
-        // Add the characteristic to the service
-        transferService.characteristics = [transferCharacteristic]
-        
-        // Add the service to the peripheral manager
-        peripheralManager.add(transferService)
+    private func setupServices() {
+        let services = CustomBleProfileConverter.convertToMutableServices(profile)
+
+        // // Add the service to the peripheral manager
+        for service in services {
+            addLog("Adding service \(service.uuid.uuidString)")
+            peripheralManager.add(service)
+        }
         
         addLog("Service setup complete")
     }
     
-    private func updateJSHandler() {
-        guard let settings = deviceSettings, settings.useJSFunction else {
-            characteristicHandlerManager.removeHandler(characteristicUUID: characteristicUUID.uuidString)
-            return
-        }
-        characteristicHandlerManager.updateHandler(
-            characteristicUUID: characteristicUUID.uuidString,
-            jsReadFunction: settings.characteristicJSReadFunction,
-            jsWriteFunction: settings.characteristicJSWriteFunction,
-            notifyInterval: settings.notifyInterval
-        )
-        addLog("Updated JavaScript handler for characteristic")
-    }
+    // private func updateJSHandler() {
+    //     guard let settings = deviceSettings, settings.useJSFunction else {
+    //         characteristicHandlerManager.removeHandler(characteristicUUID: characteristicUUID.uuidString)
+    //         return
+    //     }
+    //     characteristicHandlerManager.updateHandler(
+    //         characteristicUUID: characteristicUUID.uuidString,
+    //         jsReadFunction: settings.characteristicJSReadFunction,
+    //         jsWriteFunction: settings.characteristicJSWriteFunction,
+    //         notifyInterval: settings.notifyInterval
+    //     )
+    //     addLog("Updated JavaScript handler for characteristic")
+    // }
     
+    // TODO: move to global logger
     private func addLog(_ message: String) {
         DispatchQueue.main.async {
             let logMessage = LogMessage(timestamp: Date(), message: message)
@@ -227,6 +200,7 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         }
     }
     
+    // MARK: - peripheralManagerDidStartAdvertising
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         if let error = error {
             addLog("Error advertising: \(error.localizedDescription)")
@@ -243,15 +217,18 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         self.connectedCentrals.append(central)
         
         // Notify the characteristic handler manager of the subscription
-        characteristicHandlerManager.handleSubscription(characteristicUUID: characteristic.uuid.uuidString)
+        characteristicHandlerManager.handleSubscription(characteristic: characteristic as! CBMutableCharacteristic)
+
+        sendData("Welcome to MacOS Bluetooth Simulator!".data(using: .utf8)!, characteristic: characteristic as! CBMutableCharacteristic)
         
-        // Send a welcome message if not using JS functions
-        if deviceSettings?.useJSFunction != true {
-            let welcomeData = "Welcome to MacOS Bluetooth Simulator!".data(using: .utf8)!
-            sendData(welcomeData)
-        }
+        // // Send a welcome message if not using JS functions
+        // if deviceSettings?.useJSFunction != true {
+        //     let welcomeData = "Welcome to MacOS Bluetooth Simulator!".data(using: .utf8)!
+        //     sendData(welcomeData)
+        // }
     }
     
+    // MARK: - didUnsubscribeFromCharacteristic
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
         addLog("Central \(central.identifier.uuidString) unsubscribed from characteristic")
         
@@ -261,42 +238,50 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         self.connectedCentrals.removeAll { $0.identifier == central.identifier }
     }
     
+    // MARK: - didReceiveReadRequest
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        if request.characteristic.uuid == characteristicUUID {
-            // Check if we should use JS function for read
-            if let settings = deviceSettings, settings.useJSFunction, 
-               let jsResponse = characteristicHandlerManager.handleReadRequest(characteristicUUID: characteristicUUID.uuidString) {
-                request.value = jsResponse
-                addLog("Responded to read request with JS function result")
-            } else {
-                // Use auto response from settings
-                let responseText = deviceSettings?.autoResponseText ?? "Hello from Mac simulator!"
-                request.value = responseText.data(using: .utf8)!
-                addLog("Responded to read request with: \(responseText)")
-            }
+        addLog("Received read request for characteristic \(request.characteristic.uuid.uuidString)")
+        request.value = "Hello from Mac simulator!".data(using: .utf8)!
+        peripheral.respond(to: request, withResult: .success)
+
+        // if request.characteristic.uuid == characteristicUUID {
+        //     // Check if we should use JS function for read
+        //     if let settings = deviceSettings, settings.useJSFunction, 
+        //        let jsResponse = characteristicHandlerManager.handleReadRequest(characteristicUUID: characteristicUUID.uuidString) {
+        //         request.value = jsResponse
+        //         addLog("Responded to read request with JS function result")
+        //     } else {
+        //         // Use auto response from settings
+        //         let responseText = deviceSettings?.autoResponseText ?? "Hello from Mac simulator!"
+        //         request.value = responseText.data(using: .utf8)!
+        //         addLog("Responded to read request with: \(responseText)")
+        //     }
             
-            peripheral.respond(to: request, withResult: .success)
-        } else {
-            peripheral.respond(to: request, withResult: .attributeNotFound)
-            addLog("Read request for unknown characteristic")
-        }
+        //     peripheral.respond(to: request, withResult: .success)
+        // } else {
+        //     peripheral.respond(to: request, withResult: .attributeNotFound)
+        //     addLog("Read request for unknown characteristic")
+        // }
     }
     
+    // MARK: - didReceiveWrite
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        for request in requests {
-            if let value = request.value, request.characteristic.uuid == characteristicUUID {
-                let stringValue = String(data: value, encoding: .utf8) ?? "Unknown format data"
-                addLog("Received write: \(stringValue)")
-                if let settings = deviceSettings, settings.useJSFunction {
-                    if let jsResponse = characteristicHandlerManager.handleWriteRequest(characteristicUUID: characteristicUUID.uuidString, value: stringValue) {
-                        sendData(jsResponse)
-                        addLog("Responded to write with JS function result")
-                    }
-                } else {
-                    sendData(value)
-                }
-            }
-        }
+        addLog("Received write request for characteristic \(requests.first?.characteristic.uuid.uuidString ?? "Unknown")")
         peripheral.respond(to: requests.first!, withResult: .success)
+
+        // for request in requests {
+        //     if let value = request.value, request.characteristic.uuid == characteristicUUID {
+        //         let stringValue = String(data: value, encoding: .utf8) ?? "Unknown format data"
+        //         addLog("Received write: \(stringValue)")
+        //         if let settings = deviceSettings, settings.useJSFunction {
+        //             if let jsResponse = characteristicHandlerManager.handleWriteRequest(characteristicUUID: characteristicUUID.uuidString, value: stringValue) {
+        //                 sendData(jsResponse)
+        //                 addLog("Responded to write with JS function result")
+        //             }
+        //         } else {
+        //             sendData(value)
+        //         }
+        //     }
+        // }
     }
 } 

@@ -33,15 +33,15 @@ class CharacteristicHandlerManager: ObservableObject {
     }
     
     /// Handles a device subscribing to a characteristic
-    func handleSubscription(characteristicUUID: String) {
-        guard let handler = handlers[characteristicUUID] else { return }
+    func handleSubscription(characteristic: CBMutableCharacteristic) {
+        guard let handler = handlers[characteristic.uuid.uuidString] else { return }
         
         // Update subscription time
         handler.handleSubscription()
         
         // Start notifications
         handler.startNotifications { [weak self] data in
-            self?.bluetoothManager?.sendData(data)
+            self?.bluetoothManager?.sendData(data, characteristic: characteristic)
         }
         
         // No need to update the handler in the dictionary since it's a class (reference type)

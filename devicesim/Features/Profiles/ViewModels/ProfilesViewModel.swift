@@ -3,35 +3,35 @@ import CoreBluetooth
 
 let testProfiles = [
             CustomBleProfile(
-                uuid: CBUUID(string: "5FFE0000-5000-4000-3000-200000000000"),
+                uuid: CBUUID(string: "5FFE0000-5000-4000-0000-000000000000"),
                 name: "Test Profile",
                 deviceName: "Test Device",
                 services: [
                     CustomBleService(
-                        uuid: CBUUID(string: "1800"),
+                        uuid: CBUUID(string: "5FFE0000-5000-4000-1000-000000000000"),
                         name: "Test Service",
                         characteristics: [
                             CustomBleCharacteristic(
                                 name: "Test Characteristic 1",
-                                uuid: CBUUID(string: "2A00"),
+                                uuid: CBUUID(string: "5FFE0000-5000-4000-1000-100000000000"),
                                 properties: [.read, .write, .notify],
                                 value: nil
                             )
                         ]
                     ),
                     CustomBleService(
-                        uuid: CBUUID(string: "1801"),
+                        uuid: CBUUID(string: "5FFE0000-5000-4000-2000-000000000000"),
                         name: "Test Service 2",
                         characteristics: [
                             CustomBleCharacteristic(
                                 name: "Test Characteristic 1",
-                                uuid: CBUUID(string: "2A01"),
+                                uuid: CBUUID(string: "5FFE0000-5000-4000-2000-100000000000"),
                                 properties: [.read, .write, .notify],
                                 value: nil
                             ),
                             CustomBleCharacteristic(
                                 name: "Test Characteristic 2",
-                                uuid: CBUUID(string: "2A02"),
+                                uuid: CBUUID(string: "5FFE0000-5000-4000-2000-200000000000"),
                                 properties: [.read, .write, .notify],
                                 value: nil
                             ),
