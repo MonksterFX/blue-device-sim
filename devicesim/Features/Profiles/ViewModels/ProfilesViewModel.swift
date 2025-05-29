@@ -26,13 +26,14 @@ let testProfiles = [
                             CustomBleCharacteristic(
                                 name: "Test Characteristic 1",
                                 uuid: CBUUID(string: "5FFE0000-5000-4000-2000-100000000000"),
-                                properties: [.read, .write, .notify],
-                                value: nil
+                                properties: [.read, .write],
+                                value: nil,
+                                preset: UUID(uuidString: "476E5C4D-900B-4E13-B5D6-6D6A17742110")
                             ),
                             CustomBleCharacteristic(
                                 name: "Test Characteristic 2",
                                 uuid: CBUUID(string: "5FFE0000-5000-4000-2000-200000000000"),
-                                properties: [.read, .write, .notify],
+                                properties: [.notify],
                                 value: nil
                             ),
                         ]

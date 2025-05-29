@@ -10,6 +10,11 @@ struct JSFunctionEditorView: View {
             Text("JS Function Editor")
                 .font(.headline)
 
+            Text(viewModel.selectedPreset?.id.uuidString ?? "No Preset Selected")
+                .font(.subheadline)
+                .padding(.bottom, 8)
+                .textSelection(.enabled)
+
             Text("Description")
             InputField(value: $viewModel.description)
                 .onChange(of: viewModel.description) { _, _ in

@@ -133,22 +133,30 @@ struct CustomBleCharacteristic: Codable {
     var isNotifying: Bool = false
     // var descriptors: [CustomBleDescriptor] = []
 
+    // js engine related
+    var shared: CBUUID?
+    var preset: UUID?
+
     init(
         name: String = "",
         uuid: CBUUID = CBUUID(),
         properties: CBCharacteristicProperties,
         value: Data? = nil,
-        isNotifying: Bool = false
+        isNotifying: Bool = false,
+        preset: UUID? = nil,
+        shared: CBUUID? = nil
     ) {
         self.name = name
         self.uuid = uuid
         self.properties = properties
         self.value = value
         self.isNotifying = isNotifying
+        self.preset = preset
+        self.shared = shared
     }
 
     enum CodingKeys: String, CodingKey {
-        case uuid, name, properties, value, isNotifying, descriptors
+        case uuid, name, properties, value, isNotifying, descriptors, shared, preset
     }
 
     init(from decoder: Decoder) throws {
@@ -161,6 +169,10 @@ struct CustomBleCharacteristic: Codable {
         value = try container.decodeIfPresent(Data.self, forKey: .value)
         isNotifying = try container.decode(Bool.self, forKey: .isNotifying)
         // descriptors = try container.decode([CustomBleDescriptor].self, forKey: .descriptors)
+
+        // js engine related
+        shared = try container.decodeIfPresent(CBUUIDWrapper.self, forKey: .shared)?.uuid
+        preset = try container.decodeIfPresent(UUID.self, forKey: .preset)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -171,6 +183,10 @@ struct CustomBleCharacteristic: Codable {
         try container.encodeIfPresent(value, forKey: .value)
         try container.encode(isNotifying, forKey: .isNotifying)
         // try container.encode(descriptors, forKey: .descriptors)
+
+        // js engine related
+        try container.encodeIfPresent(CBUUIDWrapper(shared!), forKey: .shared)
+        try container.encodeIfPresent(preset, forKey: .preset)
     }
 }
 

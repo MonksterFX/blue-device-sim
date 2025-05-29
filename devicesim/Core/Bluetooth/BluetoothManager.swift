@@ -130,6 +130,8 @@ class BluetoothManager: NSObject, ObservableObject {
             peripheralManager.add(service)
         }
         
+        EngineManager.createStack(profile: profile)
+
         addLog("Service setup complete")
     }
     
@@ -211,10 +213,18 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         }
     }
     
+    func peripheralManager(_ peripheral: CBPeripheralManager, didConnect central: CBCentral) {
+        addLog("Connected to central \(central.identifier.uuidString)")
+        self.connectedCentrals.append(central)
+    }
+
+    func peripheralManager(_ peripheral: CBPeripheralManager, didDisconnect central: CBCentral, error: Error?) {
+        addLog("Disconnected from central \(central.identifier.uuidString)")
+        self.connectedCentrals.removeAll { $0.identifier == central.identifier }
+    }
+
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
         addLog("Central \(central.identifier.uuidString) subscribed to characteristic")
-        
-        self.connectedCentrals.append(central)
         
         // Notify the characteristic handler manager of the subscription
         characteristicHandlerManager.handleSubscription(characteristic: characteristic as! CBMutableCharacteristic)
@@ -241,32 +251,20 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
     // MARK: - didReceiveReadRequest
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         addLog("Received read request for characteristic \(request.characteristic.uuid.uuidString)")
-        request.value = "Hello from Mac simulator!".data(using: .utf8)!
+        
+        let value: String = EngineManager.route(characteristic: request.characteristic.uuid, action: .read, data: nil)
+        
+        request.value = value.data(using: .utf8)!
         peripheral.respond(to: request, withResult: .success)
-
-        // if request.characteristic.uuid == characteristicUUID {
-        //     // Check if we should use JS function for read
-        //     if let settings = deviceSettings, settings.useJSFunction, 
-        //        let jsResponse = characteristicHandlerManager.handleReadRequest(characteristicUUID: characteristicUUID.uuidString) {
-        //         request.value = jsResponse
-        //         addLog("Responded to read request with JS function result")
-        //     } else {
-        //         // Use auto response from settings
-        //         let responseText = deviceSettings?.autoResponseText ?? "Hello from Mac simulator!"
-        //         request.value = responseText.data(using: .utf8)!
-        //         addLog("Responded to read request with: \(responseText)")
-        //     }
-            
-        //     peripheral.respond(to: request, withResult: .success)
-        // } else {
-        //     peripheral.respond(to: request, withResult: .attributeNotFound)
-        //     addLog("Read request for unknown characteristic")
-        // }
     }
     
     // MARK: - didReceiveWrite
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         addLog("Received write request for characteristic \(requests.first?.characteristic.uuid.uuidString ?? "Unknown")")
+        
+        EngineManager.route(characteristic: requests.first!.characteristic.uuid, action: requests.first!.characteristic.properties, data: requests.first!.value!)
+
+
         peripheral.respond(to: requests.first!, withResult: .success)
 
         // for request in requests {
