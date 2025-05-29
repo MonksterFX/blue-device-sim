@@ -84,7 +84,7 @@ final class EngineManager {
             case .read:
                 return engine.runRead()
             case .write:
-                addLog("write is currently not supported")
+                 return engine.runWrite(value: data)
             case .writeWithoutResponse:
                 addLog("write without response is currently not supported")
             case .notify:

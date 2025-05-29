@@ -106,13 +106,13 @@ struct JavaScriptEngine {
         return result != nil
     }
 
-    func runRead(appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (String) {
-        guard let result = (self.context.evaluateScript("read(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000))")) else { return "test" }
+    func runRead(appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (Data) {
+        guard let result: JSValue = (self.context.evaluateScript("read(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000))")) else { return "test" }
         return (parseReturnValue(result: result))
     }
 
-    func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: String) -> (String) {
-        guard let result = (self.context.evaluateScript("write(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000), '\(value)')")) else { return "test" }
+    func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: Data) -> (Data) {
+        guard let result: JSValue = (self.context.evaluateScript("write(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000), '\(value)')")) else { return "test" }
         return (parseReturnValue(result: result))
     }
 } 
