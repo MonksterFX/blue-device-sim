@@ -19,8 +19,17 @@ struct JSFunctionTestView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Test JS Function")
-                .font(.headline)
+            HStack{
+                Text("Test JS Function")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Button("Run Test") {
+                    viewModel.runTest()
+                }
+                .buttonStyle(.borderedProminent)
+            }
 
             Picker("Operation", selection: $viewModel.operation) {
                 ForEach(JSFunctionsAdminViewModel.OperationType.allCases) { op in
@@ -42,13 +51,6 @@ struct JSFunctionTestView: View {
             }
 
             HStack {
-                Button("Run Test") {
-                    viewModel.runTest()
-                }
-                .buttonStyle(.borderedProminent)
-
-                Spacer()
-
                 Button("Reset Context") {
                     viewModel.resetContext()
                 }

@@ -1,8 +1,9 @@
 import SwiftUI
-
+import Inject
 struct LogView: View {
     @ObservedObject var bluetoothManager: BluetoothManager
-    
+    @ObserveInjection var inject
+
     var body: some View {
         VStack {
             HStack {
@@ -25,5 +26,6 @@ struct LogView: View {
             }
         }
         .padding()
+        .enableInjection()
     }
 } 

@@ -1,3 +1,4 @@
+// Source: https://github.com/inexorabletash/text-encoding/blob/master/lib/encoding.js
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 

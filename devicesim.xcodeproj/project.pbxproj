@@ -28,14 +28,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DD1A7A642DE98B8400CF499C /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = devicesim.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD1A7A652DE98B8400CF499C /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD1A7A662DE98B8400CF499C /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD1A7AB72DE98B8400CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
+		DD1A7B542DE9AAB900CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD293CAB2DE4E4C500E16D14 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02292DBCC6FF00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02652DBCC94D00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD8678DE2DE78ADB00BD2ADA /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD91AE012DE886E400C8A1DC /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
-		DDB903A52DB3D59F00BF2263 /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = devicesim.app; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesim.app"; sourceTree = "<absolute>"; };
-		DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = devicesimTests.xctest; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesim.app/Contents/PlugIns/devicesimTests.xctest"; sourceTree = "<absolute>"; };
-		DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = devicesimUITests.xctest; path = "/Users/mrmonk/Projects/AI/bluetooth device/build/Debug/devicesimUITests-Runner.app/Contents/PlugIns/devicesimUITests.xctest"; sourceTree = "<absolute>"; };
 		DDC3C2272DE8B1EE00103AB5 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DDE820E22DE8B18500E0F93A /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -84,6 +86,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DD1A7ABA2DE98B8400CF499C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DD1A7B572DE9AAB900CF499C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		DD293CAE2DE4E4C500E16D14 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +141,9 @@
 				DDB903B92DB3D5A300BF2263 /* devicesimTests */,
 				DDB903C32DB3D5A300BF2263 /* devicesimUITests */,
 				DDC3C22A2DE8B1EE00103AB5 /* devicesim */,
+				DD1A7A642DE98B8400CF499C /* devicesim.app */,
+				DD1A7A652DE98B8400CF499C /* devicesimTests.xctest */,
+				DD1A7A662DE98B8400CF499C /* devicesimUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -165,7 +184,7 @@
 				DD293CE02DE4E58000E16D14 /* Inject */,
 			);
 			productName = devicesim;
-			productReference = DDB903A52DB3D59F00BF2263 /* devicesim.app */;
+			productReference = DD1A7A642DE98B8400CF499C /* devicesim.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DDB903B52DB3D5A300BF2263 /* devicesimTests */ = {
@@ -188,7 +207,7 @@
 			packageProductDependencies = (
 			);
 			productName = devicesimTests;
-			productReference = DDB903B62DB3D5A300BF2263 /* devicesimTests.xctest */;
+			productReference = DD1A7A652DE98B8400CF499C /* devicesimTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		DDB903BF2DB3D5A300BF2263 /* devicesimUITests */ = {
@@ -211,7 +230,7 @@
 			packageProductDependencies = (
 			);
 			productName = devicesimUITests;
-			productReference = DDB903C02DB3D5A300BF2263 /* devicesimUITests.xctest */;
+			productReference = DD1A7A662DE98B8400CF499C /* devicesimUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -266,6 +285,10 @@
 					ProjectRef = DD4C02652DBCC94D00F7B554 /* devicesim.xcodeproj */;
 				},
 				{
+					ProductGroup = DD1A7B572DE9AAB900CF499C /* Products */;
+					ProjectRef = DD1A7B542DE9AAB900CF499C /* devicesim.xcodeproj */;
+				},
+				{
 					ProductGroup = DD8678E12DE78ADB00BD2ADA /* Products */;
 					ProjectRef = DD8678DE2DE78ADB00BD2ADA /* devicesim.xcodeproj */;
 				},
@@ -276,6 +299,10 @@
 				{
 					ProductGroup = DDE821132DE8B18600E0F93A /* Products */;
 					ProjectRef = DDE820E22DE8B18500E0F93A /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DD1A7ABA2DE98B8400CF499C /* Products */;
+					ProjectRef = DD1A7AB72DE98B8400CF499C /* devicesim.xcodeproj */;
 				},
 				{
 					ProductGroup = DD4C022A2DBCC6FF00F7B554 /* Products */;

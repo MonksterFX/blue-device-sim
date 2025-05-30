@@ -9,9 +9,13 @@ import SwiftUI
 
 struct JSFunctionLog: View{
     @Bindable var viewModel: JSFunctionsAdminViewModel
-    
+    @Environment(\.globalState) var globalState
+
     var body: some View{
         VStack(alignment: .leading, spacing: 4) {
+            Button("isDarkmode: "+String(globalState.isDarkmode)){
+                globalState.isDarkmode = !globalState.isDarkmode
+            }
             Text("Log Stream:")
                 .font(.subheadline)
             ScrollView {
