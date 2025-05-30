@@ -10,6 +10,22 @@ struct JavaScriptEngine {
     private(set) var canRead: Bool = false
     private(set) var canWrite: Bool = false
 
+    private func loadJavaScriptFile(resourceName: String, fileExtension: String = "js") -> Bool {
+        guard let fileURL = Bundle.main.url(forResource: resourceName, withExtension: fileExtension) else {
+            print("Error: Could not find \(resourceName).\(fileExtension) script")
+            return false
+        }
+        
+        do {
+            let script = try String(contentsOf: fileURL, encoding: .utf8)
+            context.evaluateScript(script)
+            return true
+        } catch {
+            print("Error loading script: \(error)")
+            return false
+        }
+    }
+
     init?(jsFunctionsCode: String, logStream: LogStream? = nil) {
         self.context = JSContext()!
         
@@ -30,33 +46,10 @@ struct JavaScriptEngine {
         // create a console object with a log method that logs to the log stream and accepts multiple arguments
         context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
         
-        // add polyfill to the context
-        let polyfillURL = Bundle.main.url(forResource: "textencoder", withExtension: "js")
-        guard let polyfillURL = polyfillURL else {
-            print("Error: Could not find tx-typed.min.js script")
-            return nil
-        }
-        do {
-            let script = try String(contentsOf: polyfillURL, encoding: .utf8)
-            context.evaluateScript(script)
-        } catch {
-            print("Error loading script: \(error)")
-            return nil
-        }
-        
-        // add library to the context
-        let fileURL = Bundle.main.url(forResource: "tx-typed.min", withExtension: "js")
-        guard let scriptUrl = fileURL else {
-            print("Error: Could not find tx-typed.min.js script")
-            return nil
-        }
-        do {
-            let script = try String(contentsOf: scriptUrl, encoding: .utf8)
-            context.evaluateScript(script)
-        } catch {
-            print("Error loading script: \(error)")
-            return nil
-        }
+        // add polyfill, typed support and other scripts to the context
+        guard loadJavaScriptFile(resourceName: "textencoder") else { return nil }
+        guard loadJavaScriptFile(resourceName: "tx-typed.min") else { return nil }
+        guard loadJavaScriptFile(resourceName: "context") else { return nil }
 
         // load the JavaScript code
         if !loadAndValidate(jsFunctionsCode: jsFunctionsCode) {
@@ -121,16 +114,22 @@ struct JavaScriptEngine {
     }
 
     func runRead(appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (Data) {
-        guard let result: JSValue = (self.context.evaluateScript("read(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000))")) else { 
-            // TODO: proper error handling
+        let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
+        let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
+        
+        guard let result: JSValue = (self.context.evaluateScript("read(\(_appStartTime),\(_appSubscriptionTime))")) else {
             return Data()
         }
         return jsArrayBufferToData(result) ?? Data()
     }
 
     func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: Data) -> (Data) {
-        guard let result: JSValue = (self.context.evaluateScript("write(\(appStartTime.timeIntervalSince1970 * 1000), \(subscriptionTime.timeIntervalSince1970 * 1000), '\(value)')")) else { 
-            // TODO: proper error handling
+        let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
+        let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
+        let _data = Array(value)
+        
+        // TODO: thats dirty! 
+        guard let result: JSValue = (self.context.evaluateScript("write(\(_appStartTime),\(_appSubscriptionTime),new Uint8Array(\(_data)));")) else {
             return Data()
         }
         return jsArrayBufferToData(result) ?? Data()
