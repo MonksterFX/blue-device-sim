@@ -54,7 +54,7 @@ struct ContentView: View {
                 //     }
                 //     .tag(2)
                 
-                LogView(bluetoothManager: bluetoothManager)
+                LogPage()
                     .tabItem {
                         Label("Logs", systemImage: "text.book.closed")
                     }

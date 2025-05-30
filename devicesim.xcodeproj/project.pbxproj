@@ -33,6 +33,7 @@
 		DD1A7A662DE98B8400CF499C /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD1A7AB72DE98B8400CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD1A7B542DE9AAB900CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
+		DD1A7C072DE9F5E400CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD293CAB2DE4E4C500E16D14 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02292DBCC6FF00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02652DBCC94D00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
@@ -94,6 +95,13 @@
 			sourceTree = "<group>";
 		};
 		DD1A7B572DE9AAB900CF499C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DD1A7C0A2DE9F5E400CF499C /* Products */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -303,6 +311,10 @@
 				{
 					ProductGroup = DD1A7ABA2DE98B8400CF499C /* Products */;
 					ProjectRef = DD1A7AB72DE98B8400CF499C /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DD1A7C0A2DE9F5E400CF499C /* Products */;
+					ProjectRef = DD1A7C072DE9F5E400CF499C /* devicesim.xcodeproj */;
 				},
 				{
 					ProductGroup = DD4C022A2DBCC6FF00F7B554 /* Products */;
