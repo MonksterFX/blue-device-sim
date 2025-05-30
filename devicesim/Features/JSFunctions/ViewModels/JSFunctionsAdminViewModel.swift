@@ -66,13 +66,15 @@ func dataFromHexString(_ hex: String) -> Data? {
 
 @Observable
 class JSFunctionsAdminViewModel {
+    let logger = LogManager.shared.logger(for: .jsEngine)
+    
     var presets: [JSPreset] = []
     var selectedPreset: JSPreset? = nil
     var jsCode: String = ""
     var operation: OperationType = .read
     var testInput: String = ""
     var lastResult: String = ""
-    var logStream: [String] = []
+
     var isRenaming: Bool = false
     var renameText: String = ""
     var presetToDelete: JSPreset? = nil
@@ -107,7 +109,7 @@ class JSFunctionsAdminViewModel {
     }
 
     init() {
-        logStream.append("Presets directory: \(presetsDirectory.path)")
+        logger.debug("Presets directory: \(presetsDirectory.path)")
         loadPresetsFromDisk()
     }
 
@@ -133,7 +135,7 @@ class JSFunctionsAdminViewModel {
                 }
             }
         } catch {
-            logStream.append("Failed to load presets: \(error.localizedDescription)")
+            logger.error("Failed to load presets: \(error.localizedDescription)")
         }
     }
 
@@ -181,13 +183,13 @@ class JSFunctionsAdminViewModel {
                 createPresetFileName(preset: preset))
             let data = try JSONEncoder().encode(updatedPreset)
             try data.write(to: fileURL)
-            logStream.append("Saved preset '\(preset.name)' to disk.")
+            logger.info("Saved preset '\(preset.name)' to disk.")
             hasUnsavedChanges = false
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
             }
         } catch {
-            logStream.append("Failed to save preset: \(error.localizedDescription)")
+            logger.error("Failed to save preset: \(error.localizedDescription)")
         }
     }
 
@@ -238,7 +240,7 @@ class JSFunctionsAdminViewModel {
         let newURL = presetsDirectory.appendingPathComponent("\(newName).json")
         do {
             if fileManager.fileExists(atPath: newURL.path) {
-                logStream.append("A preset with that name already exists.")
+                logger.error("A preset with that name already exists.")
                 return
             }
             try fileManager.moveItem(at: oldURL, to: newURL)
@@ -246,7 +248,7 @@ class JSFunctionsAdminViewModel {
                 id: oldPreset.id, name: newName, code: jsCode, description: description)
             let data = try JSONEncoder().encode(renamedPreset)
             try data.write(to: newURL)
-            logStream.append("Renamed preset '\(oldPreset.name)' to '\(newName)'.")
+            logger.info("Renamed preset '\(oldPreset.name)' to '\(newName)'.")
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
                 if let self = self,
@@ -256,7 +258,7 @@ class JSFunctionsAdminViewModel {
                 }
             }
         } catch {
-            logStream.append("Failed to rename preset: \(error.localizedDescription)")
+            logger.error("Failed to rename preset: \(error.localizedDescription)")
         }
     }
 
@@ -264,7 +266,7 @@ class JSFunctionsAdminViewModel {
         let fileURL = presetsDirectory.appendingPathComponent(createPresetFileName(preset: preset))
         do {
             try fileManager.removeItem(at: fileURL)
-            logStream.append("Deleted preset '\(preset.name)'.")
+            logger.info("Deleted preset '\(preset.name)'.")
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
                 if self?.selectedPreset?.id == preset.id {
@@ -279,22 +281,22 @@ class JSFunctionsAdminViewModel {
                 }
             }
         } catch {
-            logStream.append("Failed to delete preset: \(error.localizedDescription)")
+            logger.error("Failed to delete preset: \(error.localizedDescription)")
         }
     }
 
     func resetContext() -> Bool {
         // TODO: use a better log stream
         let logStreamFn: LogStream = { message in
-            self.logStream.append(message)
+            self.logger.info(message)
         }
 
         guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode, logStream: logStreamFn) else {
-            logStream.append("Failed to create JavaScript engine")
+            logger.error("Failed to create JavaScript engine")
             return false
         }
         self.context = engine
-        logStream.append("Reset context")
+        logger.info("Reset context")
         return true
     }
 
@@ -302,7 +304,7 @@ class JSFunctionsAdminViewModel {
         // ensure the context is initialized
         if context == nil {
             if !resetContext() {
-                logStream.append("Failed to reset context")
+                logger.error("Failed to reset context")
                 return
             }
             // TODO show banner with error message
@@ -311,28 +313,28 @@ class JSFunctionsAdminViewModel {
         switch operation {
         case .read:
             guard context!.canRead else {
-                logStream.append("Read function not defined")
+                logger.info("Read function not defined")
                 return
             }
             let result = context!.runRead()
-            logStream.append("Read executed -> \(result)")
+            logger.info("Read executed -> \(result)")
             lastResult = convertToString(data: result, to: self.resultType)
-            logStream.append("Read executed -> \(lastResult)")
+            logger.info("Read executed -> \(lastResult)")
 
         case .write:
             guard context!.canWrite else {
-                logStream.append("Write function not defined")
+                logger.info("Write function not defined")
                 return
             }
             let convertedInput = convertFromString(value: testInput, to: inputType)
             let result = context!.runWrite(value: convertedInput)
             lastResult = convertToString(data: result, to: self.resultType)
-            logStream.append("Write executed with input: \(testInput) -> \(lastResult)")
+            logger.info("Write executed with input: \(testInput) -> \(lastResult)")
 
         case .notify:
             // not implemented yet
             lastResult = "Notify not implemented yet"
-            logStream.append("Notify executed.")
+            logger.info("Notify executed.")
         }
     }
 
@@ -357,7 +359,7 @@ class JSFunctionsAdminViewModel {
                 createPresetFileName(preset: preset))
             let data = try JSONEncoder().encode(preset)
             try data.write(to: fileURL)
-            logStream.append("Created new preset '\(name)'.")
+            logger.info("Created new preset '\(name)'.")
             DispatchQueue.main.async { [weak self] in
                 self?.loadPresetsFromDisk()
                 if let self = self, let created = self.presets.first(where: { $0.name == name }) {
@@ -365,7 +367,7 @@ class JSFunctionsAdminViewModel {
                 }
             }
         } catch {
-            logStream.append("Failed to create preset: \(error.localizedDescription)")
+            logger.error("Failed to create preset: \(error.localizedDescription)")
         }
     }
 

@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 import Foundation
 
@@ -5,6 +6,7 @@ struct ExtendeLogStoreMessage: LogStoreMessageProtocol{
     let id: UUID
     let timestamp: Date
     let message: String
+    let level: OSLogType
     let category: LogCategory
 }
 
@@ -23,19 +25,19 @@ class LogPageViewModel {
         if selectedCategory == nil {
             return logStores.flatMap { category, store in
                 store.logs.map { log in
-                    ExtendeLogStoreMessage(id: log.id, timestamp: log.timestamp, message: log.message, category: category)
+                    ExtendeLogStoreMessage(id: log.id, timestamp: log.timestamp, message: log.message, level: log.level, category: category)
                 }
             }.sorted { $0.timestamp < $1.timestamp }
         } else {
             return logStores[selectedCategory!]!.logs.map { log in
-                ExtendeLogStoreMessage(id: log.id, timestamp: log.timestamp, message: log.message, category: selectedCategory!)
+                ExtendeLogStoreMessage(id: log.id, timestamp: log.timestamp, message: log.message, level: log.level, category: selectedCategory!)
             }.sorted { $0.timestamp < $1.timestamp }
         }
     }
 
     func addLog(message: String) {
         if selectedCategory != nil {
-            logStores[selectedCategory!]!.add(message)
+            logStores[selectedCategory!]!.add(message, .info)
         }
     }
 }

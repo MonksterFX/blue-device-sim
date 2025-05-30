@@ -2,10 +2,7 @@ import CoreBluetooth
 import Foundation
 
 final class EngineManager {
-
-    static func addLog(_ message: String) {
-        print("EngineManager: \(message)")
-    }
+    private static var logger = LogManager.shared.logger(for: .jsEngine)
 
     // dictonary of engines
     private static var stack: [CBUUID: JavaScriptEngine] = [:]
@@ -71,7 +68,7 @@ final class EngineManager {
                     shared: characteristic.shared)
             } else {
                 // TODO: proper error handling
-                addLog(
+                logger.error(
                     "characteristic \(characteristic.uuid) has no preset, skipping attaching a handler (js engine)"
                 )
             }
@@ -89,20 +86,20 @@ final class EngineManager {
                 if let data = data {
                     return engine.runWrite(value: data) 
                 } else {
-                    addLog("write without data is currently not supported")
+                    logger.error("write without data is currently not supported")
                 }
             case .writeWithoutResponse:
-                addLog("write without response is currently not supported")
+                    logger.error("write without response is currently not supported")
             case .notify:
-                addLog("notify is currently not supported")
+                    logger.error("notify is currently not supported")
             case .indicate:
-                addLog("indicate is currently not supported")
+                    logger.error("indicate is currently not supported")
             default:
-                addLog("characteristic \(characteristic) has no action \(action)")
+                    logger.error("characteristic \(characteristic) has no action \(action)")
             }
         } else {
             // TODO: proper error handling
-            addLog("No engine found for characteristic \(characteristic)")
+            logger.error("No engine found for characteristic \(characteristic)")
         }
         return "No Execution".data(using: .utf8)
     }

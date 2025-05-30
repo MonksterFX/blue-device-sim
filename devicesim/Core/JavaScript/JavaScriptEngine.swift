@@ -16,7 +16,7 @@ struct JavaScriptEngine {
         // add error handler
         context.exceptionHandler = { _, exception in
             if let exc = exception {
-                print("JS Error: \(exc.toString() ?? "Unknown error")")
+                logStream?("JS Error: \(exc.toString() ?? "Unknown error")")
             }
         }
         

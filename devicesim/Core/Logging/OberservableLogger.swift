@@ -14,17 +14,17 @@ class ObservableLogger {
 
     func debug(_ message: String) {
         logger.debug("\(message)")
-        logStore.add(message)
+        logStore.add(message, .debug)
     }
 
     func info(_ message: String) {
         logger.info("\(message)")
-        logStore.add(message)
+        logStore.add(message, .info)
     }
 
     func error(_ message: String) {
         logger.error("\(message)")
-        logStore.add(message)
+        logStore.add(message, .error)
     }
 }
 

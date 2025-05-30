@@ -28,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DD11CA562DEA146D00715E9A /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD1A7A642DE98B8400CF499C /* devicesim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = devicesim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD1A7A652DE98B8400CF499C /* devicesimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD1A7A662DE98B8400CF499C /* devicesimUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = devicesimUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +88,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DD11CA592DEA146D00715E9A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		DD1A7ABA2DE98B8400CF499C /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -299,6 +307,10 @@
 				{
 					ProductGroup = DD8678E12DE78ADB00BD2ADA /* Products */;
 					ProjectRef = DD8678DE2DE78ADB00BD2ADA /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DD11CA592DEA146D00715E9A /* Products */;
+					ProjectRef = DD11CA562DEA146D00715E9A /* devicesim.xcodeproj */;
 				},
 				{
 					ProductGroup = DD91AE042DE886E400C8A1DC /* Products */;

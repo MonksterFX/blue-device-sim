@@ -57,7 +57,7 @@ struct JSFunctionsAdminView: View {
             }, message: {
                 Text("You have unsaved changes. Would you like to save them before switching presets?")
             })
-            JSFunctionLog(viewModel: viewModel)
+            JSFunctionLog()
         }.enableInjection()
     }
 

@@ -3,29 +3,16 @@ import CoreBluetooth
 import Combine
 import AppKit
 
-struct LogMessage: Identifiable, Hashable {
-    let id = UUID()
-    let timestamp: Date
-    let message: String
-    
-    var formattedTimestamp: String {
-        timestamp.formatted(date: .omitted, time: .standard)
-    }
-    
-    var fullMessage: String {
-        "[\(formattedTimestamp)] \(message)"
-    }
-}
-
 class BluetoothManager: NSObject, ObservableObject {
     private var profilesViewModel: ProfilesViewModel = ProfilesViewModel()
+    private var logger = LogManager.shared.logger(for: .ble)
     
     // MARK: - Published Properties
     @Published var isAdvertising = false
     @Published var connectedCentrals: [CBCentral] = []
-    @Published var logMessages: [LogMessage] = []
     @Published var bluetoothState: CBManagerState = .unknown
     @Published var stateMessage: String = "Initializing Bluetooth..."
+    @Published var logs: [LogStoreMessage] = []
 
     // MARK: - Device Settings
     @Published var profile: CustomBleProfile
@@ -48,6 +35,7 @@ class BluetoothManager: NSObject, ObservableObject {
 
         // Question: this runs on main thread?
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        logs = logger.logStore.logs
 
     }
     
@@ -57,13 +45,13 @@ class BluetoothManager: NSObject, ObservableObject {
 
         guard peripheralManager.state == .poweredOn else {
             let errorMessage = "Cannot start advertising - Bluetooth is not powered on (Current state: \(stateDescription(for: peripheralManager.state)))"
-            addLog(errorMessage)
+            logger.error(errorMessage)
             
             // Provide more helpful diagnostics
             if peripheralManager.state == .unauthorized {
-                addLog("Bluetooth permission denied. Please check System Settings > Privacy & Security > Bluetooth")
+                logger.error("Bluetooth permission denied. Please check System Settings > Privacy & Security > Bluetooth")
             } else if peripheralManager.state == .poweredOff {
-                addLog("Bluetooth is turned off. Please turn on Bluetooth in System Settings or Control Center")
+                logger.error("Bluetooth is turned off. Please turn on Bluetooth in System Settings or Control Center")
             }
             
             return
@@ -77,20 +65,20 @@ class BluetoothManager: NSObject, ObservableObject {
             
             isAdvertising = true
             
-            addLog("Started advertising as '\(profile.name)'")
+            logger.info("Started advertising as '\(profile.name)'")
         }
     }
     
     func stopAdvertising() {
         peripheralManager.stopAdvertising()
         characteristicHandlerManager.stopAllHandlers()
-        addLog("Stopped advertising")
+        logger.info("Stopped advertising")
         isAdvertising = false
     }
     
     func sendData(_ data: Data, characteristic: CBMutableCharacteristic) {
         guard !connectedCentrals.isEmpty else {
-            addLog("No devices connected")
+            logger.error("No devices connected")
             return
         }
         
@@ -101,9 +89,9 @@ class BluetoothManager: NSObject, ObservableObject {
         )
         
         if didSend {
-            addLog("Sent data: \(String(data: data, encoding: .utf8) ?? "Unknown")")
+            logger.info("Sent data: \(String(data: data, encoding: .utf8) ?? "Unknown")")
         } else {
-            addLog("Failed to send data")
+            logger.error("Failed to send data")
         }
     }
     
@@ -126,13 +114,13 @@ class BluetoothManager: NSObject, ObservableObject {
 
         // // Add the service to the peripheral manager
         for service in services {
-            addLog("Adding service \(service.uuid.uuidString)")
+            logger.info("Adding service \(service.uuid.uuidString)")
             peripheralManager.add(service)
         }
         
         EngineManager.createStack(profile: profile)
 
-        addLog("Service setup complete")
+        logger.info("Service setup complete")
     }
     
     // private func updateJSHandler() {
@@ -152,13 +140,7 @@ class BluetoothManager: NSObject, ObservableObject {
     // TODO: move to global logger
     private func addLog(_ message: String) {
         DispatchQueue.main.async {
-            let logMessage = LogMessage(timestamp: Date(), message: message)
-            self.logMessages.append(logMessage)
-            
-            // Keep log size manageable
-            if self.logMessages.count > 100 {
-                self.logMessages.removeFirst(self.logMessages.count - 100)
-            }
+            self.logger.info(message)
         }
     }
 }
@@ -171,60 +153,60 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
         switch peripheral.state {
         case .poweredOn:
             stateMessage = "Bluetooth is powered on"
-            addLog("Bluetooth is powered on")
+            logger.info("Bluetooth is powered on")
         case .poweredOff:
             stateMessage = "Bluetooth is powered off - Please turn on Bluetooth"
-            addLog("Bluetooth is powered off")
+            logger.info("Bluetooth is powered off")
             isAdvertising = false
         case .resetting:
             stateMessage = "Bluetooth is resetting"
-            addLog("Bluetooth is resetting")
+            logger.info("Bluetooth is resetting")
         case .unauthorized:
             stateMessage = "Bluetooth permission denied - Check System Settings"
-            addLog("Bluetooth is unauthorized - Check System Settings > Privacy & Security > Bluetooth")
+            logger.error("Bluetooth is unauthorized - Check System Settings > Privacy & Security > Bluetooth")
         case .unsupported:
             stateMessage = "Bluetooth is not supported on this device"
-            addLog("Bluetooth is not supported")
+            logger.error("Bluetooth is not supported")
         case .unknown:
             stateMessage = "Bluetooth state is unknown"
-            addLog("Bluetooth state is unknown")
+            logger.error("Bluetooth state is unknown")
         @unknown default:
             stateMessage = "Unknown Bluetooth state"
-            addLog("Unknown Bluetooth state")
+            logger.error("Unknown Bluetooth state")
         }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
         if let error = error {
-            addLog("Error adding service: \(error.localizedDescription)")
+            logger.error("Error adding service: \(error.localizedDescription)")
         } else {
-            addLog("Service added successfully")
+            logger.info("Service added successfully")
         }
     }
     
     // MARK: - peripheralManagerDidStartAdvertising
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         if let error = error {
-            addLog("Error advertising: \(error.localizedDescription)")
+            logger.error("Error advertising: \(error.localizedDescription)")
             isAdvertising = false
         } else {
-            addLog("Advertising started successfully")
+            logger.info("Advertising started successfully")
             isAdvertising = true
         }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didConnect central: CBCentral) {
-        addLog("Connected to central \(central.identifier.uuidString)")
+        logger.info("Connected to central \(central.identifier.uuidString)")
         self.connectedCentrals.append(central)
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, didDisconnect central: CBCentral, error: Error?) {
-        addLog("Disconnected from central \(central.identifier.uuidString)")
+        logger.info("Disconnected from central \(central.identifier.uuidString)")
         self.connectedCentrals.removeAll { $0.identifier == central.identifier }
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
-        addLog("Central \(central.identifier.uuidString) subscribed to characteristic")
+        logger.info("Central \(central.identifier.uuidString) subscribed to characteristic")
         
         // Notify the characteristic handler manager of the subscription
         characteristicHandlerManager.handleSubscription(characteristic: characteristic as! CBMutableCharacteristic)
@@ -240,7 +222,7 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
     
     // MARK: - didUnsubscribeFromCharacteristic
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
-        addLog("Central \(central.identifier.uuidString) unsubscribed from characteristic")
+        logger.info("Central \(central.identifier.uuidString) unsubscribed from characteristic")
         
         // Notify the characteristic handler manager of the unsubscription
         characteristicHandlerManager.handleUnsubscription(characteristicUUID: characteristic.uuid.uuidString)
@@ -250,7 +232,7 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
     
     // MARK: - didReceiveReadRequest
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        addLog("Received read request for characteristic \(request.characteristic.uuid.uuidString)")
+        logger.info("Received read request for characteristic \(request.characteristic.uuid.uuidString)")
         
         let value = EngineManager.route(characteristic: request.characteristic.uuid, action: .read, data: nil)
     
@@ -260,7 +242,7 @@ extension BluetoothManager: CBPeripheralManagerDelegate {
     
     // MARK: - didReceiveWrite
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        addLog("Received write request for characteristic \(requests.first?.characteristic.uuid.uuidString ?? "Unknown")")
+        logger.info("Received write request for characteristic \(requests.first?.characteristic.uuid.uuidString ?? "Unknown")")
         
         EngineManager.route(characteristic: requests.first!.characteristic.uuid, action: requests.first!.characteristic.properties, data: requests.first!.value!)
 
