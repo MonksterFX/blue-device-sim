@@ -10,10 +10,13 @@ struct JSFunctionEditorView: View {
             Text("JS Function Editor")
                 .font(.headline)
 
-            Text(viewModel.selectedPreset?.id.uuidString ?? "No Preset Selected")
+            // Question: why is the name and uuid stil optional
+            if(viewModel.selectedPreset?.name != nil && viewModel.selectedPreset?.id.uuidString != nil) { 
+            Text("\(viewModel.selectedPreset!.name) - \(viewModel.selectedPreset!.id.uuidString)")
                 .font(.subheadline)
                 .padding(.bottom, 8)
                 .textSelection(.enabled)
+            }
 
             Text("Description")
             InputField(value: $viewModel.description)

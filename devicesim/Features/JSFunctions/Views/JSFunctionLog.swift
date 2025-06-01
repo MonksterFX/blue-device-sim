@@ -10,14 +10,27 @@ import SwiftUI
 struct JSFunctionLog: View{
     @Environment(\.globalState) var globalState
     let logger = LogManager.shared.logger(for: .jsEngine)
+    @State var resetIndex: Int = 0
 
     var body: some View{
         VStack(alignment: .leading, spacing: 4) {
-            Text("Log Stream:")
-                .font(.subheadline)
+            HStack {
+                Text("Log Stream:")
+                    .font(.subheadline)
+                
+                Spacer()
+                
+                Button(action: {
+                    resetIndex = logger.logStore.logs.count
+                }) {
+                    Text("Reset")
+                        .font(.subheadline)
+                }
+            }
+            
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
-                    ForEach(logger.logStore.logs) { logEntry in
+                    ForEach(logger.logStore.logs[resetIndex...]) { logEntry in
                         Text(logEntry.message)
                             .font(.caption)
                             .foregroundColor(.secondary)

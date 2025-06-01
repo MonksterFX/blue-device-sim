@@ -1,20 +1,18 @@
 // you can use types, encoder and decoder
 
 // type hints for the read function
-readTypes.in = [];
-readTypes.out = [types.String()];
+readTypes = [types.String()];
 
-function read(appStartTime, subscriptionTime) {
+function read() {
     const value = 'The time is: ' + new Date().toISOString();
-    return encoder.encode(value, readTypes.out);
+    return encoder.encode(value, readTypes);
 }
 
 // type hints for the write function
-writeTypes.in = [types.String()];
-writeTypes.out = [];
+writeTypes = [types.String()];
 
-function write(appStartTime, subscriptionTime, _value) {
-    const value = decoder.decode(_value, writeTypes.in);
-    console.log('Write value:', value);
+function write(value) {
+    const parsed = decoder.decode(value, writeTypes);
+    console.log('Parsed value:', parsed);
     return true
 }

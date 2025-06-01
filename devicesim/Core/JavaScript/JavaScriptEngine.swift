@@ -5,17 +5,18 @@ typealias LogStream = (String) -> Void
 
 struct JavaScriptEngine {
     // single instance of the JavaScript engine, context is keeped alive
-    private let context: JSContext
+    let context: JSContext
 
     private(set) var canRead: Bool = false
     private(set) var canWrite: Bool = false
 
     private func loadJavaScriptFile(resourceName: String, fileExtension: String = "js") -> Bool {
-        guard let fileURL = Bundle.main.url(forResource: resourceName, withExtension: fileExtension) else {
+        guard let fileURL = Bundle.main.url(forResource: resourceName, withExtension: fileExtension)
+        else {
             print("Error: Could not find \(resourceName).\(fileExtension) script")
             return false
         }
-        
+
         do {
             let script = try String(contentsOf: fileURL, encoding: .utf8)
             context.evaluateScript(script)
@@ -26,30 +27,42 @@ struct JavaScriptEngine {
         }
     }
 
-    init?(jsFunctionsCode: String, logStream: LogStream? = nil) {
+    init?(jsFunctionsCode: String, logStream: LogStream? = nil, loadWithoutContext: Bool = false) {
         self.context = JSContext()!
-        
+
         // add error handler
         context.exceptionHandler = { _, exception in
             if let exc = exception {
-                logStream?("JS Error: \(exc.toString() ?? "Unknown error")")
+                let message = exc.toString() ?? "Unknown error"
+                let stack = exc.forProperty("stack")?.toString() ?? "No stack trace"
+                logStream?(
+                    """
+                    JS Error: \(message)
+                    Stack Trace:
+                    \(stack)
+                    """)
             }
         }
-        
+
         let consoleLog: @convention(block) (String) -> Void = { message in
-            logStream?(message) 
+            logStream?(message)
         }
 
         // add consoleLog to the context
-        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString) 
+        context.setObject(consoleLog, forKeyedSubscript: "consoleLog" as NSString)
 
         // create a console object with a log method that logs to the log stream and accepts multiple arguments
-        context.evaluateScript("const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}")
-        
+        context.evaluateScript(
+            "const console = {log: (...args)=>{ consoleLog(args.map(arg=>arg.toString()).join(' ')); }}"
+        )
+
         // add polyfill, typed support and other scripts to the context
         guard loadJavaScriptFile(resourceName: "textencoder") else { return nil }
         guard loadJavaScriptFile(resourceName: "tx-typed.min") else { return nil }
-        guard loadJavaScriptFile(resourceName: "context") else { return nil }
+
+        if !loadWithoutContext {
+            guard loadJavaScriptFile(resourceName: "context") else { return nil }
+        }
 
         // load the JavaScript code
         if !loadAndValidate(jsFunctionsCode: jsFunctionsCode) {
@@ -66,18 +79,18 @@ struct JavaScriptEngine {
         }
 
         // check if the write function is defined
-        if !supportsWrite() {   
+        if !supportsWrite() {
             canWrite = false
             print(" No write function defined")
         } else {
             canWrite = true
         }
-        
+
         // print globals
         // let global = context.globalObject
         // print(global?.toDictionary() ?? [:])
     }
-    
+
     // TODO: decide which datatypes to support
     // parse the return value of the JavaScript function
     private func parseReturnValue(result: JSValue) -> String {
@@ -106,37 +119,44 @@ struct JavaScriptEngine {
         let result = self.context.evaluateScript("read")
         return result != nil
     }
-    
+
     // checks if a write function is defined
-    func supportsWrite() -> Bool {          
+    func supportsWrite() -> Bool {
         let result = self.context.evaluateScript("write")
         return result != nil
     }
 
     func runRead(appStartTime: Date = Date(), subscriptionTime: Date = Date()) -> (Data) {
-        let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
-        let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
-        
-        guard let result: JSValue = (self.context.evaluateScript("read(\(_appStartTime),\(_appSubscriptionTime))")) else {
+        // TODO: inject into the context
+        // let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
+        // let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
+
+        guard let result: JSValue = (self.context.evaluateScript("read();")) else {
             return Data()
         }
-        return jsArrayBufferToData(result) ?? Data()
+        return result.toUInt8ArrayData() ?? Data()
     }
 
-    func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: Data) -> (Data) {
-        let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
-        let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
+    // TODO: return BOolean
+    func runWrite(appStartTime: Date = Date(), subscriptionTime: Date = Date(), value: Data) -> (
+        Data
+    ) {
+        // TODO: inject into the context
+        // let _appStartTime = appStartTime.timeIntervalSince1970 * 1000
+        // let _appSubscriptionTime = subscriptionTime.timeIntervalSince1970 * 1000
         let _data = Array(value)
-        
-        // TODO: thats dirty! 
-        guard let result: JSValue = (self.context.evaluateScript("write(\(_appStartTime),\(_appSubscriptionTime),new Uint8Array(\(_data)));")) else {
+
+        // TODO: thats dirty!
+        guard
+            let result: JSValue = (self.context.evaluateScript("write(new Uint8Array(\(_data)));"))
+        else {
             return Data()
         }
-        return jsArrayBufferToData(result) ?? Data()
+        return result.toUInt8ArrayData() ?? Data()
     }
 
     func getTypeHint(key: TypeHintKey) -> String {
-        let result = self.context.evaluateScript("generateTypeHints(\(key.rawValue))")
+        let result = self.context.evaluateScript("generateTypeHints(\(key.rawValue));")
         return result?.toString() ?? "No type hint defined"
     }
-} 
+}

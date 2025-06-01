@@ -18,8 +18,10 @@ class JSFunctionsAdminViewModel {
     var parsedOutputTypes: [TypedValue] = []
     var parsedTypes: [TypeHintKey:TypedValue] = [:]
     var testInputType: ConvertionTypes = .string
+    var testOutputType: ConvertionTypes = .string
     var testInput: String = ""
-    var lastResult: String = ""
+    var testOutput: String = ""
+    var isSimpleTest: Bool = true
 
     // TODO: move to presets view model
     var selectedPreset: JSPreset? = nil
@@ -36,6 +38,7 @@ class JSFunctionsAdminViewModel {
 
     // TODO: move to editor view model
     var jsCode: String = ""
+
     // change detection
     var initialCodeHash: String = ""
     var hasUnsavedChanges: Bool = false
@@ -50,8 +53,10 @@ class JSFunctionsAdminViewModel {
     init() {
         logger.debug("Presets directory: \(presetsDirectory.path)")
         loadPresetsFromDisk()
+        loadTypeHints()
     }
 
+    // MARK: Presets
     func loadPresetsFromDisk() {
         do {
             if !fileManager.fileExists(atPath: presetsDirectory.path) {
@@ -150,22 +155,7 @@ class JSFunctionsAdminViewModel {
             pendingPreset = nil
         }
     }
-
-    func saveChanges() {
-        saveCurrentPreset()
-        if let preset = pendingPreset {
-            selectPreset(preset)
-        }
-    }
-
-    // Add observers for jsCode and description changes
-    func changeDetection() {
-        let codeHash = HashUtils.sha256(jsCode)
-        if codeHash != initialCodeHash {
-            hasUnsavedChanges = true
-        }
-    }
-
+    
     func renamePreset(_ newName: String) {
         guard let oldPreset = selectedPreset, !newName.isEmpty, oldPreset.name != newName else {
             return
@@ -223,71 +213,7 @@ class JSFunctionsAdminViewModel {
             logger.error("Failed to delete preset: \(error.localizedDescription)")
         }
     }
-
-    func resetContext() -> Bool {
-        // TODO: use a better log stream
-        let logStreamFn: LogStream = { message in
-            self.logger.info(message)
-        }
-
-        guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode, logStream: logStreamFn) else {
-            logger.error("Failed to create JavaScript engine")
-            return false
-        }
-        self.context = engine
-        logger.info("Reset context")
-        return true
-    }
-
-    func runTest() {
-        // ensure the context is initialized
-        if context == nil {
-            if !resetContext() {
-                logger.error("Failed to reset context")
-                return
-            }
-            // TODO show banner with error message
-        }
-
-        switch operation {
-        case .read:
-            guard context!.canRead else {
-                logger.info("Read function not defined")
-                return
-            }
-            let result = context!.runRead()
-            logger.info("Read executed -> \(result)")
-            // lastResult = convertToString(data: result, to: self.resultType)
-            // logger.info("Read executed -> \(lastResult)")
-
-        case .write:
-            guard context!.canWrite else {
-                logger.info("Write function not defined")
-                return
-            }
-            var convertedInput: Data = Data()
-        
-                
-            switch self.testInputType {
-            case .string:
-                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.string)
-            case .number:
-                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.double)
-            case .buffer:
-                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.unkown)
-            }
-                
-            let result = context!.runWrite(value: convertedInput)
-            // lastResult = convertToString(data: result, to: self.resultType)
-            // logger.info("Write executed with input: \(testInput) -> \(lastResult)")
-
-        case .notify:
-            // not implemented yet
-            lastResult = "Notify not implemented yet"
-            logger.info("Notify executed.")
-        }
-    }
-
+    
     func isValidPresetName(_ name: String) -> Bool {
         let allowed = CharacterSet.letters.union(CharacterSet(charactersIn: "-_"))
         return !name.isEmpty && name.rangeOfCharacter(from: allowed.inverted) == nil
@@ -321,6 +247,100 @@ class JSFunctionsAdminViewModel {
         }
     }
 
+    // TODO: rename
+    func saveChanges() {
+        saveCurrentPreset()
+        if let preset = pendingPreset {
+            selectPreset(preset)
+        }
+    }
+
+    // MARK: JS ENGINE
+    // Add observers for jsCode and description changes
+    func changeDetection() {
+        let codeHash = HashUtils.sha256(jsCode)
+        if codeHash != initialCodeHash {
+            hasUnsavedChanges = true
+        }
+    }
+
+    private func resetContext() -> Bool {
+        // TODO: use a better log stream
+        let logStreamFn: LogStream = { message in
+            self.logger.info(message)
+        }
+        
+        logger.info("Reload context")
+        
+        guard let engine = JavaScriptEngine(jsFunctionsCode: jsCode, logStream: logStreamFn) else {
+            logger.error("Failed to create JavaScript engine")
+            return false
+        }
+        
+        self.context = engine
+
+        self.loadTypeHints()
+        
+        return true
+    }
+    
+
+    // MARK: Test Functions
+    func runTest() {
+        // ensure the context is initialized
+        if context == nil {
+            if !resetContext() {
+                logger.error("Failed to reset context")
+                return
+            }
+            // TODO show banner with error message
+        }
+
+        switch operation {
+        case .read:
+            guard context!.canRead else {
+                logger.info("Read function not defined")
+                return
+            }
+            let result = context!.runRead()
+            logger.info("Read executed -> \(result)")
+
+            switch self.testOutputType {
+            case .string:
+                testOutput = TypeConverter.convertToString(data: result, to: DataType.string)
+            case .number:
+                testOutput = TypeConverter.convertToString(data: result, to: DataType.double)
+            case .buffer:
+                testOutput = TypeConverter.convertToString(data: result, to: DataType.unkown)
+            }   
+
+        case .write:
+            guard context!.canWrite else {
+                logger.info("Write function not defined")
+                return
+            }
+                
+            var convertedInput: Data = Data()
+        
+            switch self.testInputType {
+            case .string:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.string)
+            case .number:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.double)
+            case .buffer:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.unkown)
+            }
+
+            // write response is not used 
+            let _ = context!.runWrite(value: convertedInput)
+
+        case .notify:
+            // not implemented yet
+            testOutput = "Notify not implemented yet"
+            logger.info("Notify executed.")
+        }
+    }
+
     func loadExample() {
         let resourceName = "example"
         guard let fileURL = Bundle.main.url(forResource: resourceName, withExtension: "js") else {
@@ -341,8 +361,23 @@ class JSFunctionsAdminViewModel {
             return
         }
         let typeHint = context.getTypeHint(key: key)
-        logger.info("Type hint for \(key): \(typeHint)")
+        logger.debug("Type hint for \(key): \(typeHint)")
         parsedInputTypes = TypeHintParser.parse(typeHint)
+    }
+    
+    func loadTypeHints(){
+        // reload type hint
+        switch operation {
+        case .read:
+                loadTypeHint(key: .readOut)
+                isSimpleTest = parsedInputTypes.count == 0
+        case .notify:
+                loadTypeHint(key: .readOut)
+                isSimpleTest = parsedInputTypes.count == 0
+        case .write:
+                loadTypeHint(key: .writeIn)
+                isSimpleTest = parsedOutputTypes.count == 0
+        }
     }
 
     private var debounceTask: Task<Void, Never>? = nil
@@ -358,14 +393,6 @@ class JSFunctionsAdminViewModel {
 
             // Update change detection
             changeDetection()
-
-            // TODO: make it dynamic
-            // reload type hint
-            loadTypeHint(key: .readIn)
-            loadTypeHint(key: .readOut)
-
-            loadTypeHint(key: .writeIn)
-            loadTypeHint(key: .writeOut)
 
             // Log the change
             logger.debug("JS code changed - reset context")

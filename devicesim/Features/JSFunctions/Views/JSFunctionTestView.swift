@@ -20,14 +20,14 @@ struct JSFunctionTestView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            
+
             // MARK: - Test Header
-            HStack{
+            HStack {
                 Text("Test JS Function")
                     .font(.headline)
-                
+
                 Spacer()
-                
+
                 Button("Run Test") {
                     viewModel.runTest()
                 }
@@ -67,31 +67,41 @@ struct JSFunctionTestView: View {
             //     .buttonStyle(.bordered)
             // }
 
-            // VStack(alignment: .leading, spacing: 4) {
-            //     Text("Input Type")
-            //         .font(.subheadline)
-            //     ConvertionTypePicker(selectedType: $viewModel.inputType)
-
-            //     Text("Result Type")
-            //         .font(.subheadline)
-            //     ConvertionTypePicker(selectedType: $viewModel.resultType)
-            // }
-            // .pickerStyle(.segmented)
-            // .tint(.accentColor)
-            // .padding(.vertical, 4)
-
             VStack(alignment: .leading, spacing: 4) {
-                Text("Last Result")
-                    .font(.subheadline)
-                Text(viewModel.lastResult)
-                    .font(.body)
-                    .padding(6)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if viewModel.operation == .write {
+                    Text("Input Type")
+                        .font(.subheadline)
+                    ConvertionTypePicker(selectedType: $viewModel.testInputType)
+                } else {
+                    Text("Result Type")
+                        .font(.subheadline)
+                    ConvertionTypePicker(selectedType: $viewModel.testOutputType)
+                }
             }
+            .pickerStyle(.segmented)
+            .tint(.accentColor)
             .padding(.vertical, 4)
- 
+
+            if viewModel.operation == .read || viewModel.operation == .notify {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Last Result")
+                        .font(.subheadline)
+                    Text(viewModel.testOutput)
+                        .font(.body)
+                        .padding(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(6)
+                }
+                .padding(.vertical, 4)
+            }
+
+            if viewModel.operation == .write {
+                Text("Input Values")
+            } else {
+                Text("Output Values")
+            }
+
             JSTypeInputView(viewModel: viewModel)
 
             Spacer()

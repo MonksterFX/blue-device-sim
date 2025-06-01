@@ -29,7 +29,7 @@ struct JSFunctionsAdminView: View {
                             viewModel.onJSCodeChanged(oldValue: oldValue, newValue: newValue)
                         }
 
-                    JSFunctionLog().frame(maxHeight: 100)
+                    JSFunctionLog().frame(maxHeight: 300)
                 }
 
                 // MARK: - JS Function Test View

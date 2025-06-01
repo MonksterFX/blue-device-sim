@@ -12,10 +12,8 @@ enum OperationType: String, CaseIterable, Identifiable {
 }
 
 enum TypeHintKey: String {
-    case readIn = "readTypes.in"
-    case readOut = "readTypes.out"
-    case writeIn = "writeTypes.in"
-    case writeOut = "writeTypes.out"
+    case readOut = "readTypes"
+    case writeIn = "writeTypes"
 }
 
 enum DataType: String {

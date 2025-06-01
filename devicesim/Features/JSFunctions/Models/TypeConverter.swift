@@ -44,6 +44,7 @@ struct TypeConverter {
         }
     }
 
+    // TODO: catch exceptions
     static func convertFromString(value: String, to type: DataType) -> Data {
         switch type {
         case .string:
@@ -55,17 +56,17 @@ struct TypeConverter {
         case .int8:
             return withUnsafeBytes(of: Int8(value)!) { Data($0) }
         case .uint16:
-            return withUnsafeBytes(of: UInt16(value)!) { Data($0) }
+            return withUnsafeBytes(of: UInt16(value)!.littleEndian) { Data($0) }
         case .int16:
-            return withUnsafeBytes(of: Int16(value)!) { Data($0) }
+            return withUnsafeBytes(of: Int16(value)!.littleEndian) { Data($0) }
         case .uint32:
-            return withUnsafeBytes(of: UInt32(value)!) { Data($0) }
+            return withUnsafeBytes(of: UInt32(value)!.littleEndian) { Data($0) }
         case .int32:
-            return withUnsafeBytes(of: Int32(value)!) { Data($0) }
+            return withUnsafeBytes(of: Int32(value)!.littleEndian) { Data($0) }
         case .float:
-            return withUnsafeBytes(of: Float(value)!) { Data($0) }
+                return withUnsafeBytes(of: Float(value)!.bitPattern.littleEndian) { Data($0) }
         case .double:
-            return withUnsafeBytes(of: Double(value)!) { Data($0) }
+                return withUnsafeBytes(of: Double(value)!.bitPattern.littleEndian) { Data($0) }
         case .unkown:
             return dataFromHexString(value) ?? Data()
         }
