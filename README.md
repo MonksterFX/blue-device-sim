@@ -7,7 +7,11 @@ A macOS application that simulates a Bluetooth Low Energy (BLE) peripheral devic
 - Simulates a BLE peripheral device
 - Advertises custom services and characteristics
 - Allows iOS devices to connect and read/write data
-- Simple user interface to control the peripheral state
+- Advanced JavaScript function support for dynamic responses
+- Preset management for JavaScript functions
+- Real-time testing of JavaScript functions
+- Profile management for device settings
+- Detailed logging and debugging capabilities
 
 ## Requirements
 
@@ -29,12 +33,27 @@ A macOS application that simulates a Bluetooth Low Energy (BLE) peripheral devic
 3. Use your iOS device to scan for and connect to this device
 4. Interact with the simulated services and characteristics
 
+### JavaScript Functions
+
+The simulator supports dynamic responses through JavaScript functions. You can:
+- Create and manage function presets
+- Test functions in real-time
+- Use type hints for better function development
+- Support for read, write, and notify operations
+
+### Profiles
+
+- Save and load different device configurations
+- Customize device name, service UUID, and characteristic UUID
+- Manage manufacturer data and RSSI settings
+- Auto-response capabilities
+
 ## License
 
 MIT License 
 
 ## AI Usage
-This repro is currently heavily developed with Cursor AI. Please not that there will be major structural changes at all times until rules, process and code style is etablished.
+This repo is currently heavily developed with Cursor AI. Please note that there will be major structural changes at all times until rules, process and code style is established.
 
 ## JavaScript Function Example
 
@@ -43,31 +62,36 @@ When using the JavaScript function editor, you must define both a `read` and a `
 Example:
 
 ```javascript
-/**
- * @param {number} appStartTime - The time (in ms since epoch) when the app started
- * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
- * @returns {string|number|object} The value to return to the client
- */
-function read(appStartTime, subscriptionTime) {
-    // Return a string, number, or object
-    return 'Read value: ' + new Date().toISOString();
+// type hints for the read function
+readTypes = [types.String()];
+
+function read() {
+    const value = 'The time is: ' + new Date().toISOString();
+    return encoder.encode(value, readTypes);
 }
 
-/**
- * @param {number} appStartTime - The time (in ms since epoch) when the app started
- * @param {number} subscriptionTime - The time (in ms since epoch) when the subscription started
- * @param {string} value - The value written by the client
- * @returns {string|number|object|boolean} The result of the write operation
- */
-function write(appStartTime, subscriptionTime, value) {
-    // Log the value and return a result
-    console.log('Write value:', value);
-    return true;
+// type hints for the write function
+writeTypes = [types.Double];
+
+function write(value) {
+    const parsed = decoder.decode(value, writeTypes);
+    console.log('Parsed value:', parsed);
+    return true
 }
 ```
 
-- `appStartTime`: The time (in ms since epoch) when the app started
-- `subscriptionTime`: The time (in ms since epoch) when the subscription started
-- `value`: The value written by the client (for write only)
+### Type Support
 
-Both functions must be present in the editor for correct operation.
+The simulator supports various data types for JavaScript functions:
+- String
+- Number
+- Buffer
+- Custom objects
+
+### Testing
+
+The simulator includes a built-in testing interface that allows you to:
+- Test read and write operations
+- View real-time function output
+- Debug function behavior
+- Validate type conversions
