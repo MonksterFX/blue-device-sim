@@ -1,80 +1,29 @@
+import Combine
 import CryptoKit
-//
-//  JSFunctionsAdminViewModel.swift
-//  devicesim
-//
-//  Created by Max Mönch on 26.04.25.
-//
 import Foundation
+import SwiftUI
 
-enum ConvertionTypes {
-    case string
-    case number
-    case buffer
-}
 
-func convertToString(data: Data, to type: ConvertionTypes) -> String {
-    switch type {
-    case .string:
-        return String(data: data, encoding: .utf8)!
-    case .number:
-        return String(
-            data.withUnsafeBytes {
-                $0.load(as: Double.self)
-            })
-    case .buffer:
-            return data.map { String(format: "%02X", $0) }.joined(separator: " ")
-    }
-}
-
-func convertFromString(value: String, to type: ConvertionTypes) -> Data {
-    switch type {
-    case .string:
-        return value.data(using: .utf8)!
-    case .number:
-        var double = Double(value)
-        return withUnsafeBytes(of: &double) { Data($0) } ?? Data()
-    case .buffer:
-        return dataFromHexString(value) ?? Data()
-    }
-}
-
-func dataFromHexString(_ hex: String) -> Data? {
-    var data = Data()
-    var hex = hex
-
-    // Remove any whitespace or prefix (e.g. "0x")
-    hex = hex.replacingOccurrences(of: " ", with: "")
-    hex = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
-
-    guard hex.count % 2 == 0 else { return nil } // Must be even-length
-
-    var index = hex.startIndex
-    while index < hex.endIndex {
-        let nextIndex = hex.index(index, offsetBy: 2)
-        let byteString = hex[index..<nextIndex]
-        if let byte = UInt8(byteString, radix: 16) {
-            data.append(byte)
-        } else {
-            return nil // Invalid hex digit
-        }
-        index = nextIndex
-    }
-
-    return data
-}
 
 @Observable
 class JSFunctionsAdminViewModel {
     let logger = LogManager.shared.logger(for: .jsEngine)
-    
-    var presets: [JSPreset] = []
-    var selectedPreset: JSPreset? = nil
-    var jsCode: String = ""
+
+    // TODO: global state
+    var context: JavaScriptEngine? = nil
+
+    // TODO: move to test view model
     var operation: OperationType = .read
+    var parsedInputTypes: [TypedValue] = []
+    var parsedOutputTypes: [TypedValue] = []
+    var parsedTypes: [TypeHintKey:TypedValue] = [:]
+    var testInputType: ConvertionTypes = .string
     var testInput: String = ""
     var lastResult: String = ""
 
+    // TODO: move to presets view model
+    var selectedPreset: JSPreset? = nil
+    var presets: [JSPreset] = []
     var isRenaming: Bool = false
     var renameText: String = ""
     var presetToDelete: JSPreset? = nil
@@ -83,29 +32,19 @@ class JSFunctionsAdminViewModel {
     var showInvalidNameAlert: Bool = false
     var showNewPresetAlert: Bool = false
     var newPresetName: String = ""
+    var pendingPreset: JSPreset? = nil
 
-    // js engine context
-    var context: JavaScriptEngine? = nil
-    var inputType: ConvertionTypes = .string
-    var resultType: ConvertionTypes = .string
-
+    // TODO: move to editor view model
+    var jsCode: String = ""
     // change detection
     var initialCodeHash: String = ""
     var hasUnsavedChanges: Bool = false
     var showUnsavedChangesAlert: Bool = false
-    var pendingPreset: JSPreset? = nil
 
     private let fileManager = FileManager.default
     private var presetsDirectory: URL {
         let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsPath.appendingPathComponent("JSFunctionPresets", isDirectory: true)
-    }
-
-    enum OperationType: String, CaseIterable, Identifiable {
-        case read = "Read"
-        case write = "Write"
-        case notify = "Notify"
-        var id: String { rawValue }
     }
 
     init() {
@@ -318,18 +257,29 @@ class JSFunctionsAdminViewModel {
             }
             let result = context!.runRead()
             logger.info("Read executed -> \(result)")
-            lastResult = convertToString(data: result, to: self.resultType)
-            logger.info("Read executed -> \(lastResult)")
+            // lastResult = convertToString(data: result, to: self.resultType)
+            // logger.info("Read executed -> \(lastResult)")
 
         case .write:
             guard context!.canWrite else {
                 logger.info("Write function not defined")
                 return
             }
-            let convertedInput = convertFromString(value: testInput, to: inputType)
+            var convertedInput: Data = Data()
+        
+                
+            switch self.testInputType {
+            case .string:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.string)
+            case .number:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.double)
+            case .buffer:
+                convertedInput = TypeConverter.convertFromString(value: testInput, to: DataType.unkown)
+            }
+                
             let result = context!.runWrite(value: convertedInput)
-            lastResult = convertToString(data: result, to: self.resultType)
-            logger.info("Write executed with input: \(testInput) -> \(lastResult)")
+            // lastResult = convertToString(data: result, to: self.resultType)
+            // logger.info("Write executed with input: \(testInput) -> \(lastResult)")
 
         case .notify:
             // not implemented yet
@@ -384,5 +334,41 @@ class JSFunctionsAdminViewModel {
             logger.error("Error loading script: \(error)")
         }
         self.resetContext()
+    }
+
+    func loadTypeHint(key: TypeHintKey) {
+        guard let context = context else {
+            return
+        }
+        let typeHint = context.getTypeHint(key: key)
+        logger.info("Type hint for \(key): \(typeHint)")
+        parsedInputTypes = TypeHintParser.parse(typeHint)
+    }
+
+    private var debounceTask: Task<Void, Never>? = nil
+
+    func onJSCodeChanged(oldValue: String, newValue: String) {
+        debounceTask?.cancel()
+        debounceTask = Task {
+            // wait for 3 seconds
+            try? await Task.sleep(for: .seconds(3))
+
+            // Reset the context when code changes
+            _ = resetContext()
+
+            // Update change detection
+            changeDetection()
+
+            // TODO: make it dynamic
+            // reload type hint
+            loadTypeHint(key: .readIn)
+            loadTypeHint(key: .readOut)
+
+            loadTypeHint(key: .writeIn)
+            loadTypeHint(key: .writeOut)
+
+            // Log the change
+            logger.debug("JS code changed - reset context")
+        }
     }
 }

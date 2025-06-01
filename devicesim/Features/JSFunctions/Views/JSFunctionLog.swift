@@ -24,7 +24,8 @@ struct JSFunctionLog: View{
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }.frame(maxWidth: .infinity)
-            }.frame(maxWidth: .infinity)
+            }
+            .frame(maxWidth: .infinity)
             .background(Color.gray.opacity(0.05))
             .cornerRadius(6)
         }

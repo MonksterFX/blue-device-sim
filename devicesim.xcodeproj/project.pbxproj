@@ -35,6 +35,7 @@
 		DD1A7AB72DE98B8400CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD1A7B542DE9AAB900CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD1A7C072DE9F5E400CF499C /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
+		DD28621D2DEA7E6800F8EED7 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD293CAB2DE4E4C500E16D14 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02292DBCC6FF00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
 		DD4C02652DBCC94D00F7B554 /* devicesim.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = devicesim.xcodeproj; sourceTree = "<group>"; };
@@ -110,6 +111,13 @@
 			sourceTree = "<group>";
 		};
 		DD1A7C0A2DE9F5E400CF499C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DD2862202DEA7E6800F8EED7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -295,6 +303,10 @@
 				{
 					ProductGroup = DD293CAE2DE4E4C500E16D14 /* Products */;
 					ProjectRef = DD293CAB2DE4E4C500E16D14 /* devicesim.xcodeproj */;
+				},
+				{
+					ProductGroup = DD2862202DEA7E6800F8EED7 /* Products */;
+					ProjectRef = DD28621D2DEA7E6800F8EED7 /* devicesim.xcodeproj */;
 				},
 				{
 					ProductGroup = DD4C02682DBCC94D00F7B554 /* Products */;

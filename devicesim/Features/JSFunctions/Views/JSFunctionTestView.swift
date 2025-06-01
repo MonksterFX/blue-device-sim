@@ -16,9 +16,12 @@ struct ConvertionTypePicker: View {
 struct JSFunctionTestView: View {
     @ObserveInjection var inject
     @Bindable var viewModel: JSFunctionsAdminViewModel
+    @Bindable var testViewModel: JSFunctionsTestViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            
+            // MARK: - Test Header
             HStack{
                 Text("Test JS Function")
                     .font(.headline)
@@ -32,12 +35,14 @@ struct JSFunctionTestView: View {
             }
 
             Picker("Operation", selection: $viewModel.operation) {
-                ForEach(JSFunctionsAdminViewModel.OperationType.allCases) { op in
+                ForEach(OperationType.allCases) { op in
                     Text(op.rawValue).tag(op)
                 }
             }
             .pickerStyle(.segmented)
             .tint(.accentColor)
+
+            // MARK: - Test Input
 
             if viewModel.operation == .write {
                 TextField("Input value", text: $viewModel.testInput)
@@ -50,25 +55,30 @@ struct JSFunctionTestView: View {
                     .foregroundColor(.red)
             }
 
-            HStack {
-                Button("Reset Context") {
-                    viewModel.resetContext()
-                }
-                .buttonStyle(.bordered)
-            }
+            // HStack {
+            //     Button("Reset Context") {
+            //         viewModel.resetContext()
+            //     }
+            //     .buttonStyle(.bordered)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Input Type")
-                    .font(.subheadline)
-                ConvertionTypePicker(selectedType: $viewModel.inputType)
+            //     Button("Load Type Hint") {
+            //         viewModel.loadTypeHint(key: "writeTypes.in")
+            //     }
+            //     .buttonStyle(.bordered)
+            // }
 
-                Text("Result Type")
-                    .font(.subheadline)
-                ConvertionTypePicker(selectedType: $viewModel.resultType)
-            }
-            .pickerStyle(.segmented)
-            .tint(.accentColor)
-            .padding(.vertical, 4)
+            // VStack(alignment: .leading, spacing: 4) {
+            //     Text("Input Type")
+            //         .font(.subheadline)
+            //     ConvertionTypePicker(selectedType: $viewModel.inputType)
+
+            //     Text("Result Type")
+            //         .font(.subheadline)
+            //     ConvertionTypePicker(selectedType: $viewModel.resultType)
+            // }
+            // .pickerStyle(.segmented)
+            // .tint(.accentColor)
+            // .padding(.vertical, 4)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Last Result")
@@ -81,7 +91,11 @@ struct JSFunctionTestView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 4)
+ 
+            JSTypeInputView(viewModel: viewModel)
+
             Spacer()
+
         }.enableInjection()
     }
 }

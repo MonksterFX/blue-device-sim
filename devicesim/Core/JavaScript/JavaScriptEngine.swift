@@ -134,4 +134,9 @@ struct JavaScriptEngine {
         }
         return jsArrayBufferToData(result) ?? Data()
     }
+
+    func getTypeHint(key: TypeHintKey) -> String {
+        let result = self.context.evaluateScript("generateTypeHints(\(key.rawValue))")
+        return result?.toString() ?? "No type hint defined"
+    }
 } 
